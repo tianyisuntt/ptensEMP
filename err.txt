@@ -1,0 +1,14 @@
+/home/andrew/.local/lib/python3.8/site-packages/scipy/__init__.py:146: UserWarning: A NumPy version >=1.16.5 and <1.23.0 is required for this version of SciPy (detected version 1.23.4
+  warnings.warn(f"A NumPy version >={np_minversion} and <{np_maxversion}"
+Traceback (most recent call last):
+  File "GCNConv_Tester.py", line 39, in <module>
+    (GCNConv(128,128),'x,G->x'),
+  File "/home/andrew/Summer2022Research/mp/ptens_layers.py", line 27, in __init__
+    self.lin = Linear(in_channels, out_channels, bias)
+  File "/home/andrew/Summer2022Research/mp/ptens_layers.py", line 9, in __init__
+    torch.nn.init.uniform_(-sqrt(in_channels),sqrt(in_channels))
+  File "/home/andrew/.local/lib/python3.8/site-packages/torch/nn/init.py", line 137, in uniform_
+    return _no_grad_uniform_(tensor, a, b)
+  File "/home/andrew/.local/lib/python3.8/site-packages/torch/nn/init.py", line 14, in _no_grad_uniform_
+    return tensor.uniform_(a, b)
+AttributeError: 'float' object has no attribute 'uniform_'
