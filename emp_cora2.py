@@ -2,7 +2,7 @@
 
 import torch
 import ptens as p
-
+from ptens.functions import *
 A=p.ptensors1.randn([[1,2,3],[3,5],[2]],3)
 print("A=", A)
 M=torch.randn(3,5)
@@ -43,7 +43,8 @@ print(G.nhoods(0))
 print(G.nhoods(1))
 print(G.nhoods(2))
 print("==========================")
-A = p.ptensors2.randn([[1,2],[3]],3)
+A = p.ptensors1.randn([[1,2],[3]],3)
 G = p.graph.from_matrix(torch.ones(3,2))
-B = p.transfer2(A,[[1],[2,3],[1,3]],G)
+B = p.transfer2(A,[[1,2],[2,3]],G) #f?
+
 print("B=", B)

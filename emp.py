@@ -2,6 +2,25 @@
 
 import torch
 import ptens as p
+from ptens_layers import GCNConv, Linear
+import numpy as np
+from torch_geometric.datasets import Planetoid
+from torch_geometric.transforms import NormalizeFeatures
+dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
+
+class EMP(torch.nn.Module):
+    def __init__(self, hidden_channels):
+        super().__init__()
+        torch.manual_seed(12345)
+        self.conv1 = GCNConv(dataset.num_features, hidden_channels)
+        self.lin1 = Linear(hidden_channels, dataset.num_classes)
+
+    def forward(self, x, edge_index):
+        x = self.conv1(x)
+        x = p.relu(x)
+        x = self.lin1(x)
+        return x
+    
 
 class EMP1(torch.nn.Module):
     def __init__(self,x,G):
@@ -19,16 +38,16 @@ class EMP1(torch.nn.Module):
         x = self.pu2(x,G)
         return x
 
-x =
-y =
-M = 
-atoms =
-nc = 
-prelayer =
-atoms_thislayer =
-G = 
-n_vertices = 
-prob_e =
+#x =
+#y =
+#M = 
+#atoms =
+#nc = 
+#prelayer =
+#atoms_thislayer =
+#G = 
+#n_vertices = 
+#prob_e =
 
 class EMP2(torch.nn.Module):
     def __init__(self, hidden_channels):
@@ -77,17 +96,19 @@ class EMP2(torch.nn.Module):
         
         self.concat = p.cat(x, y) # nc and atoms of x and y are same.
         self.relu = p.relu(x, alpha = 0.5) # x is ptensors of any dim.
-        self.inp = p.inp(x, y) 
+        self.inp = p.inp(x, y)
+        self.diff2 = p.diff2(x) # 0;1;2
         self.transform = x*M # M = feature_matrix
+        self.outer = p.outer(y) # pts0->1,2,3; pts1->0,1; pts2->0
         
         self.ptens0_to_torch = x.torch()
         self.torch_to_ptens0 = p.ptensors0.from_matrix(x) # ok: pts0
 
-        self.u1 = p.unite1(x,G) # ok: pts0, pts1, pts2
-        self.u2 = p.unite2(x,G) # ok: pts0, pts1, pts2
+        self.u1 = p.unite1(x,G) 
+        self.u2 = p.unite2(x,G) 
         
         self.gather = p.gather(x,G) # ok: pts0
-
+        
         self.init_G = p.graph.from_matrix(adj_matrix)
         self.init_G_t = G.torch()        
         self.init_G_adj_p = p.ptensors0.from_matrix(G_t)
@@ -109,7 +130,7 @@ class EMP2(torch.nn.Module):
         x = x.relu(x, 0.5)
         return x
 
-print('EMP2 on Cora=======================================================')
+print('EMP on Cora=======================================================')
 from deeprobust.graph.data import Dataset
 data = Dataset(root='/tmp/', name='cora', seed=15)
 adj, features, labels = data.adj, data.features, data.labels
@@ -118,7 +139,7 @@ feature_matrix = torch.from_numpy(features.toarray())
 labels_matrix = torch.tensor(labels)
 n_classes = len(np.unique(labels)) 
 
-model = EMP2(hidden_channels = 16) # init
+model = EMP(hidden_channels = 16) # init
 print(model)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 criterion = torch.nn.CrossEntropyLoss()

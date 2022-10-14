@@ -28,6 +28,10 @@ labels_matrix = torch.tensor(labels)
 idx_train, idx_val, idx_test = data.idx_train, data.idx_val, data.idx_test
 print('idx_train.shape, idx_val.shape, idx_test.shape: ', idx_train.shape, idx_val.shape, idx_test.shape) #(247,) (249,) (1988,)
 
+print('==================================new===========================================')
+
+
+
 print('==================================graph===========================================')
 G = p.graph.from_matrix(adj_matrix)
 #print('G.nhoods(0):', len(G.nhoods(0)))
@@ -57,7 +61,7 @@ print('G_p2_p2 # of atoms:', len(G_p2_p2.get_atoms())) #2485
 #print('G_p2_p2[0]:', G_p2_p2[0]) # every single channel is [0]
 #print('G_p2_p2[100]:', G_p2_p2[100]) # every single channel is [0]
 
-# TODO: change the channels of a graph to # of classes
+# TODO: change the # of channels of a graph to # of classes
 
 print('==================================adj_matrix======================================')
 A0 = p.ptensors0.from_matrix(adj_matrix) 
@@ -138,6 +142,4 @@ A1_f0 = A1_f[0]
 ##B_f = p.gather(A_feature, G_f) #f
 ##print('B_f # of channels:', B_f.get_nc())
 ##print('B_f # of atoms:',len(B_f.get_atoms()))
-
-
 
