@@ -6,11 +6,14 @@ import ptens
 class Linear(torch.nn.Module):
   def __init__(self,in_channels, out_channels, bias = True) -> None:
     super().__init__()
+    r"""
+    This follows Glorot initialization for weights.
+    """
     self.w = torch.empty(in_channels,out_channels)
     torch.nn.init.uniform_(self.w,-1/sqrt(in_channels),1/sqrt(in_channels))
     if bias:
       self.b = torch.empty(out_channels)
-      torch.nn.init.uniform_(self.b,-1/sqrt(in_channels),1/sqrt(in_channels))
+      torch.nn.init.zeros_(self.b)
     else:
       self.b = None
   def parameters(self, recurse: bool = True) -> Iterator[torch.nn.Parameter]:

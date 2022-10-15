@@ -11,8 +11,9 @@ from torch_geometric.datasets import Planetoid
 from torch.nn import EmbeddingBag, ReLU, Softmax
 import ptens
 # hyper parameters
-use_pyg_model = False
-learning_rate = 0.00001
+use_ptens_model = True 
+learning_rate = 0.001
+hidden_channels = 128
 decay = 0.5
 epochs = 20
 warmup_epochs = 10
@@ -28,7 +29,8 @@ graph = dataset[0]
 train_mask, val_mask, test_mask = graph.train_mask, graph.val_mask, graph.test_mask
 x = graph.x
 y = graph.y
-G = ptens.graph.from_matrix(torch.sparse_coo_tensor(graph.edge_index,torch.ones(graph.edge_index.size(1),dtype=bool)).float().to_dense())
+G = ptens.graph.from_matrix(torch.sparse_coo_tensor(graph.edge_index,torch.ones(graph.edge_index.size(1),dtype=bool)).float().to_dense()) \
+  if use_ptens_model else graph.edge_index
 
 #
 # defining model
@@ -57,12 +59,13 @@ model = nn.Sequential('x,G',[
 class Model(torch.nn.Module):
   def __init__(self) -> None:
     super().__init__()
-    self.embedding = EmbeddingBag(in_channels,128)
+    self.embedding = EmbeddingBag(in_channels,hidden_channels)
     self.conv = [
-      GCNConv(128,128,False)
+      GCNConv(hidden_channels,hidden_channels,False) if use_ptens_model else PyG_GCNConv(hidden_channels,hidden_channels,normalize=False,bias=False)
       for i in range(5)
     ]
-    self.lin = Linear(128,out_channels,False)
+    self.lin = Linear(128,out_channels,False) if use_ptens_model else torch.nn.Linear(hidden_channels,out_channels,False)
+    self.relu = ptens.relu if use_ptens_model else torch.nn.ReLU(True)
   def parameters(self, recurse: bool = True) -> List[torch.nn.Parameter]:
     params = []
     params += self.embedding.parameters()
@@ -77,12 +80,14 @@ class Model(torch.nn.Module):
     return super().train(mode)
   def forward(self, x: torch.Tensor, G: ptens.graph) -> torch.Tensor:
     x = self.embedding(x)
-    x = ptens.ptensors0.from_matrix(x)
-    x = ptens.relu(x)
+    if use_ptens_model:
+      x = ptens.ptensors0.from_matrix(x)
+    x = self.relu(x)
     for c in self.conv:
-      x = ptens.relu(c(x,G))
+      x = self.relu(c(x,G))
     x = self.lin(x)
-    x = x.torch()
+    if use_ptens_model:
+      x = x.torch()
     x = torch.softmax(x,1)
     return x
 model = Model()
@@ -92,12 +97,12 @@ print([s.size() for s in model.parameters()])
 def compute_accuracy(mask: torch.Tensor) -> float:
   with torch.no_grad():
     predictions = model(x,G)[mask].detach()
-    print(predictions)
+    #print(predictions)
     predictions = predictions.argmax(1)
   labels = y[mask].detach()
-  print(predictions)
-  print(labels)
-  raise Exception()
+  #print(predictions)
+  #print(labels)
+  #raise Exception()
   return (predictions == labels).float().mean()
 
 loss = torch.nn.NLLLoss()
