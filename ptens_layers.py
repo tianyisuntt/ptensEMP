@@ -1,5 +1,6 @@
 from math import sqrt
 from turtle import forward
+from typing import Iterator
 import torch
 import ptens
 class Linear(torch.nn.Module):
@@ -12,6 +13,8 @@ class Linear(torch.nn.Module):
       torch.nn.init.uniform_(self.b,-sqrt(in_channels),sqrt(in_channels))
     else:
       self.b = None
+  def parameters(self, recurse: bool = True) -> Iterator[torch.nn.Parameter]:
+    return [self.w] if self.b is None else [self.w, self.b]
   def forward(self,x: ptens.ptensor0) -> ptens.ptensor0:
     return x * self.w if self.b is None else (x * self.w + self.b)
 class GCNConv(torch.nn.Module):
@@ -28,6 +31,8 @@ class GCNConv(torch.nn.Module):
     # [Nxf] * [fxf'] -> NxNxf
     # Nxf -> NxNxNxf -> Mxf
     # A * M + b
+  def parameters(self, recurse: bool = True) -> Iterator[torch.nn.Parameter]:
+    return self.lin.parameters()
   def forward(self, features: ptens.ptensor0, graph: ptens.graph):
     propagated_messages = ptens.gather(features,graph)
     #print(propagated_messages.size())

@@ -1,4 +1,6 @@
+from sqlite3 import paramstyle
 from turtle import forward
+from typing import List
 import torch
 from ptens_layers import GCNConv, Linear
 #from torch_geometric.nn import GCNConv as PyG_GCNConv, Sequential
@@ -60,7 +62,15 @@ class Model(torch.nn.Module):
     self.conv1 = GCNConv(128,128,False)
     self.conv2 = GCNConv(128,128,False)
     self.lin = Linear(128,out_channels,False)
+  def parameters(self, recurse: bool = True) -> List[torch.nn.Parameter]:
+    params = []
+    params += self.embedding.parameters()
+    params += self.conv1.parameters()
+    params += self.conv2.parameters()
+    params += self.lin.parameters()
+    return params
   def forward(self, x: torch.Tensor, G: ptens.graph) -> torch.Tensor:
+    #print(list(self.embedding.parameters())[0].flatten()[0])
     x = self.embedding(x)
     x = ptens.ptensors0.from_matrix(x)
     x = ptens.relu(x)
@@ -68,12 +78,14 @@ class Model(torch.nn.Module):
     x = ptens.relu(x)
     x = self.conv2(x,G)
     x = self.lin(x)
+    print(list(self.lin.parameters())[0].flatten()[0])
     x = x.torch()
     #x = x.sum()
     #x.backward()
-    x = torch.softmax(x,1)
+    #x = torch.softmax(x,1)
     return x
 model = Model()
+print([s.size() for s in model.parameters()])
 
 # running tests
 def compute_accuracy(mask: torch.Tensor) -> float:
@@ -89,7 +101,7 @@ train_y = y[train_mask]
 for epoch in range(epochs):
   optimizer.zero_grad()
   l = loss(model(x,G)[train_mask],train_y)
-  print("loss:",l)
+  #print("loss:",l)
   l.backward()
   optimizer.step()
   if epoch >= warmup_epochs:
