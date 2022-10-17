@@ -14,8 +14,8 @@ import ptens
 use_ptens_model = True 
 learning_rate = 0.001
 hidden_channels = 128
-decay = 0.5
-epochs = 20
+decay = 0.9
+epochs = 100
 warmup_epochs = 10
 # getting dataset
 class ToInt(BaseTransform):
@@ -88,7 +88,7 @@ class Model(torch.nn.Module):
     x = self.lin(x)
     if use_ptens_model:
       x = x.torch()
-    x = torch.softmax(x,1)
+    #x = torch.softmax(x,1)
     return x
 model = Model()
 print([s.size() for s in model.parameters()])
@@ -114,11 +114,13 @@ init_weights = [p + 0 for p in model.parameters()]
 val_history = []
 train_history = []
 test_history = []
+loss_histroy = []
 for epoch in range(epochs):
   print("\nepoch: %d" % (epoch + 1))
   optimizer.zero_grad()
   l = loss(model(x,G)[train_mask],train_y)
-  print("loss:",l)
+  loss_histroy.append(l.tolist())
+  print("loss:",loss_histroy[-1])
   l.backward()
   #print(list(model.parameters())[-1].grad)
   optimizer.step()
@@ -138,4 +140,7 @@ plt.plot(train_history)
 plt.plot(test_history)
 plt.plot(val_history)
 plt.legend(labels=['train','test','val'])
-plt.savefig('train_history.png')
+plt.savefig('accuracy_history.png')
+plt.clf()
+plt.plot(loss_histroy)
+plt.savefig('loss_history.png')
