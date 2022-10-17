@@ -10,14 +10,15 @@ class Linear(torch.nn.Module):
     This follows Glorot initialization for weights.
     """
     self.w = torch.empty(in_channels,out_channels)
-    torch.nn.init.uniform_(self.w,-1/sqrt(in_channels),1/sqrt(in_channels))
-    if bias:
-      self.b = torch.empty(out_channels)
-      torch.nn.init.zeros_(self.b)
-    else:
-      self.b = None
+    self.b = torch.empty(out_channels) if bias else None
+    self.reset_parameters()
   def parameters(self, recurse: bool = True) -> Iterator[torch.nn.Parameter]:
     return [self.w] if self.b is None else [self.w, self.b]
+  def reset_parameters(self):
+    in_channels = self.w.size(0)
+    self.w = torch.nn.init.uniform_(self.w,-1/sqrt(in_channels),1/sqrt(in_channels))
+    if not self.b is None:
+      self.b = torch.nn.init.zeros_(self.b)
   def train(self, mode: bool = True):
     self.w.requires_grad = mode
     if not self.b is None:
@@ -49,10 +50,14 @@ class GCNConv(torch.nn.Module):
     # A * M + b
   def parameters(self, recurse: bool = True) -> Iterator[torch.nn.Parameter]:
     return self.lin.parameters()
+  def reset_parameters(self):
+    self.lin.reset_parameters()
   def train(self, mode: bool = True):
     self.lin.train(mode)
     return super().train(mode)
-  def forward(self, features: ptens.ptensor0, graph: ptens.graph):
+  def forward(self, features: ptens.ptensors0, graph: ptens.graph):
+    assert isinstance(graph,ptens.graph)
+    assert isinstance(features,ptens.ptensors0)
     propagated_messages = ptens.gather(features,graph)
     if self.add_self_loops:
       propagated_messages += features
