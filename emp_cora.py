@@ -32,3 +32,21 @@ correct = labels_matrix == x
 print(correct)
 acc = int(correct.sum()) / int(len(labels))  
 print(acc)
+
+class EMP(torch.nn.Module):
+    def __init__(self, hidden_channels):
+        super().__init__()
+        torch.manual_seed(1234567)
+        self.conv1 = GCNConv(x.get_nc(), hidden_channels)
+        self.conv1 = GCNConv(x.get_nc(), hidden_channels)
+
+    def forward(self, x, edge_index):
+        x = G_adj_p*feature_matrix
+        x = x*torch.ones(x.get_nc(), hidden_channels)
+        x = p.relu(x, 0.1)
+        x = x*torch.ones(x.get_nc(), n_classes)
+        x = p.relu(x, 0.1)
+        x = x*torch.ones(x.get_nc(), 1)
+        x = x.torch().int()
+        x = torch.reshape(x, (-1,))      
+        

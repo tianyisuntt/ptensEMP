@@ -13,12 +13,12 @@ class EMP(torch.nn.Module):
         super().__init__()
         torch.manual_seed(12345)
         self.conv1 = GCNConv(dataset.num_features, hidden_channels)
-        self.lin1 = Linear(hidden_channels, dataset.num_classes)
+        self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
 
     def forward(self, x, edge_index):
         x = self.conv1(x)
         x = p.relu(x)
-        x = self.lin1(x)
+        x = self.conv2(x)
         return x
     
 
@@ -141,7 +141,7 @@ n_classes = len(np.unique(labels))
 
 model = EMP(hidden_channels = 16) # init
 print(model)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.5)
 criterion = torch.nn.CrossEntropyLoss()
 
 def train():
