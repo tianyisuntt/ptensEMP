@@ -48,5 +48,6 @@ class EMP(torch.nn.Module):
         x = p.relu(x, 0.1)
         x = x*torch.ones(x.get_nc(), 1)
         x = x.torch().int()
-        x = torch.reshape(x, (-1,))      
+        x = torch.reshape(x, (-1,))
+        return x
         
