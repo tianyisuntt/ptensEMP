@@ -10,8 +10,8 @@ import torch
 import torch.nn.functional as F
 from torch import tensor
 from torch.utils.tensorboard import SummaryWriter
-import experiments.ssp_utils as ut
-import experiments.ssp_psgd as ssp_psgd
+import ssp_utils as ut
+import ssp_psgd as ssp_psgd
 from globals import *
 import ptens as p
 

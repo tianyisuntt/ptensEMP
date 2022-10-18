@@ -1,5 +1,4 @@
 from math import sqrt
-from turtle import forward
 from typing import Iterator
 import torch
 import ptens
@@ -25,14 +24,7 @@ class Linear(torch.nn.Module):
       self.b.requires_grad = mode
     return super().train(mode)
   def forward(self,x: ptens.ptensor0) -> ptens.ptensor0:
-    #return x * self.w if self.b is None else (x * self.w + self.b)
-    # TODO: make this more efficient.
-    if self.b is None:
-      return x * self.w
-    else:
-      x = x * self.w
-      x = x + ptens.ptensors0.from_matrix(self.b.broadcast_to(len(x),len(self.b)))
-      return x
+    return x * self.w if self.b is None else ptens.linear(x,self.w,self.b) 
 class GCNConv(torch.nn.Module):
   def __init__(self, in_channels: int, out_channels: int, bias: bool = True, add_self_loops: bool = True) -> None:
     super().__init__()

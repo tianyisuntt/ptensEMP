@@ -8,8 +8,8 @@ import torch.nn.functional as F
 import ptens_layers as pl
 import ptens as p
 from torch_geometric.nn import GCNConv
-from experiments.ssp_datasets import get_planetoid_dataset
-from experiments.ssp_train_eval import run
+from ssp_datasets import get_planetoid_dataset
+from ssp_train_eval import run
 from globals import *
 
 parser = argparse.ArgumentParser()
