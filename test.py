@@ -6,7 +6,7 @@ from models import MLP, GCN, GAT
 def train():
       model.train()
       optimizer.zero_grad()  
-      out = model(data.x, data.edge_index)  # Perform a single forward pass.
+      out = model(data.x, data.edge_index)  
       loss = criterion(out[data.train_mask], data.y[data.train_mask])  
       loss.backward() 
       optimizer.step() 
@@ -15,7 +15,7 @@ def train():
 def test():
       model.eval()
       out = model(data.x, data.edge_index)
-      pred = out.argmax(dim=1)  # Use the class with highest probability.
+      pred = out.argmax(dim=1)  
       train_correct = pred[data.train_mask] == data.y[data.train_mask]  
       train_acc = int(train_correct.sum()) / int(data.train_mask.sum())  
       test_correct = pred[data.test_mask] == data.y[data.test_mask]  

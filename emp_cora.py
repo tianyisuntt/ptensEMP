@@ -3,8 +3,10 @@
 import torch
 import ptens as p
 import numpy as np
-
 from deeprobust.graph.data import Dataset
+
+device = torch.device('cuda:0' if torch.cuda.is_available() and not use_ptens else 'cpu')
+
 data = Dataset(root='/tmp/', name='cora', seed=15)
 adj, features, labels = data.adj, data.features, data.labels
 adj_matrix = torch.from_numpy(adj.toarray())
@@ -15,7 +17,7 @@ hidden_channels = 16
 
 G = p.graph.from_matrix(adj_matrix)
 G_adj_t = G.torch()
-G_adj_p = p.ptensors0.from_matrix(G_adj_t)
+G_adj_p = p.ptensors0.from_matrix(G_adj_t).to(device)
         
 x = G_adj_p*feature_matrix
 x = x*torch.ones(x.get_nc(), hidden_channels)
