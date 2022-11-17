@@ -1,4 +1,4 @@
-# Model under construction.
+# Models under construction.
 
 import torch
 import ptens as p
@@ -7,6 +7,27 @@ import numpy as np
 from torch_geometric.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
 dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
+
+
+class EMP0(torch.nn.Module):
+    def __init__(self, hidden_channels):
+        super().__init__()
+        torch.manual_seed(1234567)
+        self.conv1 = GCNConv(x.get_nc(), hidden_channels)
+        self.conv1 = GCNConv(x.get_nc(), hidden_channels)
+
+    def forward(self, x, edge_index):
+        x = G_adj_p*feature_matrix
+        x = x*torch.ones(x.get_nc(), hidden_channels)
+        x = p.relu(x, 0.1)
+        x = x*torch.ones(x.get_nc(), n_classes)
+        x = p.relu(x, 0.1)
+        x = x*torch.ones(x.get_nc(), 1)
+        x = x.torch().int()
+        x = torch.reshape(x, (-1,))
+        return x
+        
+
 
 class EMP(torch.nn.Module):
     def __init__(self, hidden_channels):
