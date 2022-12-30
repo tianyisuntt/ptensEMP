@@ -1,4 +1,5 @@
 from typing import List, Optional
+from torch_geometric.typing import pyg_lib
 import torch
 import ptens as p
 import PtensModules 
@@ -24,9 +25,10 @@ class HeteroLinear(torch.nn.Module):
         self.w = torch.nn.init.xavier_uniform_(self.w)
         if not self.b is None:
             self.b = torch.nn.init.zeros_(self.b)
- # TODO:           
+            
     def forward(self, x: p.ptensors0, type_vec: p.ptensors0) -> p.ptensors0:
         assert x.get_nc() == self.w.size(0)
+ # TODO:  
         if torch_geometric.typing.WITH_PYG_LIB:
             assert self.w is not None
 
@@ -53,4 +55,6 @@ class HeteroLinear(torch.nn.Module):
                 mask = type_vec == i
                 out[mask] = lin(x[mask])
         return out
+
+class MessagePassing(torch.nn.Module):
     
