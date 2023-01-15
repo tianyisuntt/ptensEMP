@@ -13,17 +13,25 @@ transform_nodes = RandomNodeSplit(split = 'test_rest',
 data = transform_nodes(data)
 
 class MLP(torch.nn.Module):
-    def __init__(self, hidden_channels):
+    def __init__(self, hidden_channels1, hidden_channels2, hidden_channels3):
         super().__init__()
         torch.manual_seed(12345)
-        self.lin1 = Linear(dataset.num_features, hidden_channels)
-        self.lin2 = Linear(hidden_channels, dataset.num_classes)
+        self.lin1 = Linear(dataset.num_features, hidden_channels1)
+        self.lin2 = Linear(hidden_channels1, hidden_channels2)
+        self.lin3 = Linear(hidden_channels2, hidden_channels3)
+        self.lin4 = Linear(hidden_channels3, dataset.num_classes)
 
     def forward(self, x, edge_index):
         x = self.lin1(x)
         x = x.relu()
         x = F.dropout(x, p=0.5, training=self.training)
         x = self.lin2(x)
+        x = x.relu()
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = self.lin3(x)
+        x = x.relu()
+        x = F.dropout(x, p=0.5, training=self.training)
+        x = self.lin4(x)
         return x
     
 class GCN(torch.nn.Module):
@@ -113,7 +121,7 @@ for epoch in range(1, 201):
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
 
-model = MLP(hidden_channels=256)
+model = MLP(hidden_channels1=256, hidden_channels2=168, hidden_channels3=32)
 print(model)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 criterion = torch.nn.CrossEntropyLoss()
@@ -146,10 +154,18 @@ Train Accuracy: 0.907112970711297 . Test Accuracy: 1.0 .
 Dataset: Cora
 hidden_channels = 256
 epoches = 200
+round1:
 MLP(
   (lin1): Linear(in_features=1433, out_features=256, bias=True)
   (lin2): Linear(in_features=256, out_features=7, bias=True)
 )
 Train Accuracy: 0.9757322175732217 . Test Accuracy: 0.7777777777777778 .
+round2:
+MLP(
+  (lin1): Linear(in_features=1433, out_features=256, bias=True)
+  (lin2): Linear(in_features=256, out_features=32, bias=True)
+  (lin3): Linear(in_features=32, out_features=7, bias=True)
+)
+Train Accuracy: 0.999581589958159 . Test Accuracy: 0.8333333333333334 .
 =================================================================
 """
