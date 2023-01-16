@@ -4,11 +4,11 @@ from torch_geometric.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from Transforms import ToPtens_Batch
-dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
-data = dataset[0]  # Get the first graph object.
+dataset = Planetoid(root='data/Planetoid', name='PubMed', transform=NormalizeFeatures())
+data = dataset[0]  
 transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 500,
-                                  num_val = 300)
+                                  num_train_per_class = 6300,
+                                  num_val = 500)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -61,11 +61,9 @@ for epoch in range(1, 201):
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
 """
-Dataset: Cora
-hidden_channels = 32
+PubMed:
+hidden_channels = 32,
 reduction_type = "mean"
 epoches = 200
-Train Accuracy: 0.5062761506276151 . Test Accuracy: 0.2222222222222222 .
-round2:
-Train Accuracy: 0.6740585774058577 . Test Accuracy: 0.8333333333333334 .
+Train Accuracy: 0.7804586002514519 . Test Accuracy: 0.8408910103420844 .
 """
