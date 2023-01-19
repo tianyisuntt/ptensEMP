@@ -7,9 +7,10 @@ from torch_geometric.data import Data
 class PreComputeNorm(BaseTransform):
   def __call__(self, data):
     norm = torch.sparse_coo_tensor(data.edge_index,torch.ones(data.edge_index.size(1))).to_dense().sum(0)**-0.5
-    norm = norm.cuda()
+    #norm = norm.cuda()
     data.norm = norm
     return data
+  
 class ToPtens_Batch(BaseTransform):
   def __call__(self, data: Data) -> Data:
     #data.G = p.graph.from_edge_index(data.edge_index.float())
