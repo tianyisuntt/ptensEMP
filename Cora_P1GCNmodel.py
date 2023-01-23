@@ -65,7 +65,5 @@ Dataset: Cora
 hidden_channels = 32
 reduction_type = "mean"
 epoches = 200
-Train Accuracy: 0.5062761506276151 . Test Accuracy: 0.2222222222222222 .
-round2:
 Train Accuracy: 0.6740585774058577 . Test Accuracy: 0.8333333333333334 .
 """
