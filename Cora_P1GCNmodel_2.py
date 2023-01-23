@@ -14,7 +14,7 @@ print(f'Number of classes: {dataset.num_classes}')
 data = dataset[0]
 transform_nodes = RandomNodeSplit(split = 'test_rest', 
                                   num_train_per_class = 500,
-                                  num_val = 300)
+                                  num_val = 30)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -94,43 +94,60 @@ def test():
       out = model(data.x,data.G, None)
       pred = out.argmax(dim=1)  
       train_correct = pred[data.train_mask] == data.y[data.train_mask]  
-      train_acc = int(train_correct.sum()) / int(data.train_mask.sum())  
+      train_acc = int(train_correct.sum()) / int(data.train_mask.sum())
+      val_correct = pred[data.val_mask] == data.y[data.val_mask]  
+      val_acc = int(val_correct.sum()) / int(data.val_mask.sum())
       test_correct = pred[data.test_mask] == data.y[data.test_mask]  
       test_acc = int(test_correct.sum()) / int(data.test_mask.sum()) 
-      return train_acc, test_acc
+      return train_acc, val_acc, test_acc
 
 
 embedding_dim = 64
 convolution_dim = 64
 dense_dim = 300
 reduction_type = 'mean'
-model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool) 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.05, weight_decay=5e-4)
+model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool)
+lr = 0.01
+wd = 8e-1
+optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=wd)
 criterion = torch.nn.CrossEntropyLoss()
 for epoch in range(1, 201):
     loss = train()
-    train_acc, test_acc = test()
-    print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
+    train_acc, val_acc, test_acc = test()
+    print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}', ", Train Accuracy:", train_acc, ", Validation Accuracy", val_acc, ", Test Accuracy:", test_acc, ".")
+print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, Train Accuracy:', train_acc,", Validation Accuracy:", val_acc, ", Test Accuracy:", test_acc, ".")
 print('=================================================================')
 '''
-Number of graphs: 1
-Number of features: 1433
-Number of classes: 7
-Number of nodes: 2708
-Number of edges: 10556
-Average node degree: 3.90
 Number of training nodes: 2390
 Training node label rate: 0.88
 Number of validation nodes: 300
 Validation node label rate: 0.11
 Number of testing nodes: 18
 Testing node label rate: 0.01
-Has isolated nodes: False
-Has self-loops: False
-Is undirected: True
+
+embedding_dim = 64
+convolution_dim = 64
+dense_dim = 300
+reduction_type = 'mean'
 Epoch: 200, Loss: 1.3205
+lr=0.05, weight_decay=5e-4
 Train Accuracy: 0.43179916317991635 . Test Accuracy: 0.6666666666666666 .
+'''
+'''
+Number of training nodes: 2390
+Training node label rate: 0.88
+Number of validation nodes: 30
+Validation node label rate: 0.01
+Number of testing nodes: 288
+Testing node label rate: 0.11
+
+embedding_dim = 64
+convolution_dim = 64
+dense_dim = 300
+reduction_type = 'mean'
+Epoch: 200, Loss: 1.3205
+lr=0.01, weight_decay=8e-1
+Epoch: 200, Loss: 5.5128, Train Accuracy: 0.20920502092050208 , Validation Accuracy: 1.0 , Test Accuracy: 1.0 .
 '''
 
 
