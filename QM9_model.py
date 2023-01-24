@@ -27,7 +27,7 @@ dataset = QM9(root = 'data/QM9/', pre_transform=on_process_transform)
 print('dataset', dataset)
 train_set, val_set, test_set = torch.utils.data.random_split(dataset, [100000, 10000, 20831])
 print(len(train_set), len(val_set), len(test_set))
-batch_size = 256
+batch_size = 32
 train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, prefetch_factor=2)
 valid_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False, prefetch_factor=2)
 test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, prefetch_factor=2)
@@ -43,7 +43,7 @@ class ConvolutionalLayer(torch.nn.Module):
         self.activ2 = torch.nn.ReLU(True)
         self.nhops = nhops
     def forward(self, x: ptens.ptensors1, G: ptens.graph) -> ptens.ptensors1:
-        x1 = x.transfer1(G.nhoods(self.nhops),G,True)
+        x1 = x.transfer1(G.nhoods(self.nhops),G,False)
         atoms = x1.get_atoms()
         x2 = x1.torch()
     #
@@ -79,13 +79,13 @@ class Model(torch.nn.Module):
         x = self.conv2(x,G)
         x = self.conv3(x,G)
         x = self.conv4(x,G)
-        x = ptens.linmaps0(x,True)
+        x = ptens.linmaps0(x,False)
         x = x.torch()
         x = self.pooling(x,batch)
         x = self.batchnorm(x)
         x = self.activ1(self.lin1(x))
         x = self.activ2(self.lin2(x))
-        x = self.lin2(x)
+        x = self.lin3(x)
         return x
 
 
@@ -98,7 +98,7 @@ print(model)
 
 
 learning_rate = 0.005
-weight_decay = 1E-4
+weight_decay = 8E-4
 max_decay = 0.5
 optimizer = torch.optim.Adam(model.parameters(),
                              learning_rate,
@@ -130,10 +130,11 @@ def compute_accuracy(loader):
 
 T = 0
 t_start = monotonic()
-epochs = 20#200
+epochs = 20 #200
 val_acc_history = []
 all_acc_history = []
-best_validation_score = 0
+best_validation_score = torch.inf
+epoch0 = 0
 for epoch in range(epoch0 + 1,epochs):
     total = 0
     index = 0
@@ -163,8 +164,8 @@ for epoch in range(epoch0 + 1,epochs):
         train_acc = compute_accuracy(train_loader)
         test_acc = compute_accuracy(test_loader)
         print("train mse:",train_acc)
-        print("test  mse:",test_acc)
         print("valid mse:",val_acc)
+        print("test  mse:",test_acc)
         all_acc_history.append((train_acc,test_acc,val_acc))
     model.eval()
     if val_acc < best_validation_score:
@@ -175,10 +176,19 @@ for epoch in range(epoch0 + 1,epochs):
     print() 
 
 print("\ttrain mse:",compute_accuracy(train_loader))
+print("\tvalid mse:",compute_accuracy(valid_loader))
 print("\ttest  mse:",compute_accuracy(test_loader))
-print("\tvalid mse_loss:",compute_accuracy(valid_loader))
 '''
-train mse: tensor(71564.3828)
-test  mse: tensor(484.0068)
-valid mse: tensor(146342.2188)
+train/valid/test_size = 100000/10000/20831
+batch_size = 32
+embedding_dim = 64
+convolution_dim = 300
+dense_dim = 600
+learning_rate = 0.005
+weight_decay = 8E-4
+max_decay = 0.5
+epochs = 20
+train mse: tensor(0.19643)
+valid mse: tensor(0.20523)
+test  mse: tensor(0.24918)
 '''
