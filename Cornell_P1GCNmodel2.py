@@ -74,4 +74,5 @@ for epoch in range(1, 601):
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
     print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-
+#Epoch: 249, Loss: 1.6202
+#Train Accuracy: 0.2457627118644068 . Test Accuracy: 0.2222222222222222 .
