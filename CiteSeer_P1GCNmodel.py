@@ -6,9 +6,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from Transforms import ToPtens_Batch
 dataset = Planetoid(root='data/Planetoid', name='CiteSeer', transform=NormalizeFeatures())
 data = dataset[0]  
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 510,
-                                  num_val = 500)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 532,
+                                  num_test = 665)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -52,17 +52,15 @@ def test():
 
     
 model = P1GCN(hidden_channels = 32, reduction_type = "mean") # subject to change
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=8e-4)
 criterion = torch.nn.CrossEntropyLoss()
 for epoch in range(1, 201):
     loss = train()
     train_acc, test_acc = test()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
+    print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-CiteSeer:
-num_train_per_class = 510, num_val = 500
-hidden_channels = 32, reduction_type = "mean"
-Train Accuracy: 0.6458036984352774 . Test Accuracy: 0.7333333333333333 .
-"""
+#"""
+# Epoch: 200, Loss: 1.4102
+# lr=0.001, weight_decay=8e-4
+# Train Accuracy: 0.7098591549295775 . Test Accuracy: 0.6661654135338346 .
