@@ -6,10 +6,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from Transforms import ToPtens_Batch
 dataset = WebKB(root='data/WebKB', name='Wisconsin', transform=NormalizeFeatures())
 data = dataset[0]  
-transform_nodes = RandomNodeSplit(split = 'random', 
-                                 num_train_per_class = 100,
-                                 num_val = 1, 
-                                 num_test = 150)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 40,
+                                  num_test = 50)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -52,25 +51,23 @@ def test():
       return train_acc, test_acc
 
     
-model = P1GCN(hidden_channels = 64, reduction_type = "mean") # subject to change
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+model = P1GCN(hidden_channels = 128, reduction_type = "mean") # subject to change
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=8e-4)
 criterion = torch.nn.CrossEntropyLoss()
 for epoch in range(1, 201):
     loss = train()
     train_acc, test_acc = test()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
+    print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-Wisconsin:
-round1:
-num_train_per_class = 100, num_val = 1, num_test = 150
-hidden_channels = 64, reduction_type = "mean"
-epoches: 200
-Train Accuracy: 0.3905579399141631 . Test Accuracy: 0.11764705882352941 .
-round2:
-num_train_per_class = 100, num_val = 1, num_test = 150
-hidden_channels = 64, reduction_type = "sum"
-epoches: 200
-Train Accuracy: 0.463519313304721 . Test Accuracy: 0.17647058823529413 .
-"""
+# hidden_channels = 64, reduction_type = "mean"
+# lr=0.01, weight_decay=5e-4
+# epoches = 200
+# Epoch: 200, Loss: 1.3073
+# Train Accuracy: 0.4658385093167702 . Test Accuracy: 0.42 .
+
+# hidden_channels = 128, reduction_type = "mean"
+# lr=0.001, weight_decay=8e-4
+# Epoch: 200, Loss: 1.0864
+# Train Accuracy: 0.515527950310559 . Test Accuracy: 0.42 .
+
