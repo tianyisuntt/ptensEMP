@@ -6,9 +6,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from Transforms import ToPtens_Batch
 dataset = Planetoid(root='data/Planetoid', name='PubMed', transform=NormalizeFeatures())
 data = dataset[0]  
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 6300,
-                                  num_val = 500)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 3154,
+                                  num_test = 3943)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -52,18 +52,28 @@ def test():
 
     
 model = P1GCN(hidden_channels = 32, reduction_type = "mean") # subject to change
+print(model)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 criterion = torch.nn.CrossEntropyLoss()
 for epoch in range(1, 201):
     loss = train()
     train_acc, test_acc = test()
-    #print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
+    print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
+    print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-PubMed:
-hidden_channels = 32,
-reduction_type = "mean"
-epoches = 200
-Train Accuracy: 0.7804586002514519 . Test Accuracy: 0.8408910103420844 .
-"""
+'''
+hidden_channels = 32, reduction_type = "mean"
+P1GCN(
+  (conv1): ConvolutionalLayer_1P(
+    (lin): Linear()
+  )
+  (conv2): ConvolutionalLayer_1P(
+    (lin): Linear()
+  )
+  (dropout): Dropout()
+)
+lr=0.01, weight_decay=5e-4
+# Epoch: 191, Loss: 1.3968
+# Train Accuracy: 0.8029419223941161 . Test Accuracy: 0.7881933438985737 .
+'''
+
