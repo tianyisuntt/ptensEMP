@@ -76,10 +76,14 @@ print('=================================================================')
 # lr=0.01, weight_decay=5e-4
 # Epoch: 335, Loss: 134.0845
 # Train Accuracy: 0.241864406779661 . Test Accuracy: 0.2222222222222222 .
-# hidden_channels1 = 256, hidden_channels2 = 128, hidden_channels3 = 64, reduction_type = "mean"
 # =================================================================
+# hidden_channels1 = 256, hidden_channels2 = 128, hidden_channels3 = 64, reduction_type = "mean"
 # lr=0.01, weight_decay=5e-4
 # unnormalized linmaps
 # Epoch: 200, Loss: 129.5781
 # Train Accuracy: 0.22033898305084745 . Test Accuracy: 0.19444444444444445 .
-
+# =================================================================
+# hidden_channels1 = 256, reduction_type = "mean"
+# lr=0.001, weight_decay=8e-4
+#Epoch: 200, Loss: 1.3340
+#Train Accuracy: 0.3983050847457627 . Test Accuracy: 0.2222222222222222 .
