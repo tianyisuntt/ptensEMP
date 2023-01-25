@@ -8,10 +8,9 @@ dataset = WebKB(root='data/WebKB', name='Cornell', transform=NormalizeFeatures()
 data = dataset[0]
 
 Normalization = PreComputeNorm()
-transform_nodes = RandomNodeSplit(split = 'random', 
-                                  num_train_per_class = 70,
-                                  num_val = 3,
-                                  num_test = 110)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 29,
+                                  num_test = 36)
 on_learn_transform = ToPtens_Batch()
 
 data = Normalization(data)
@@ -19,28 +18,28 @@ data = transform_nodes(data)
 data = on_learn_transform(data)
 
 class P1GCN(torch.nn.Module):
-    def __init__(self, hidden_channels1, hidden_channels2, hidden_channels3, reduction_type):
+    def __init__(self, hidden_channels1, reduction_type):
         super().__init__()
         torch.manual_seed(12345)
         self.conv1 = ptens.modules.ConvolutionalLayer_1P(dataset.num_features, hidden_channels1, reduction_type)
-        self.conv2 = ptens.modules.ConvolutionalLayer_1P(hidden_channels1, hidden_channels2, reduction_type)
-        self.conv3 = ptens.modules.ConvolutionalLayer_1P(hidden_channels2, hidden_channels3, reduction_type)
-        self.conv4 = ptens.modules.ConvolutionalLayer_1P(hidden_channels3, dataset.num_classes, reduction_type)
+       # self.conv2 = ptens.modules.ConvolutionalLayer_1P(hidden_channels1, hidden_channels2, reduction_type)
+       # self.conv3 = ptens.modules.ConvolutionalLayer_1P(hidden_channels2, hidden_channels3, reduction_type)
+        self.conv4 = ptens.modules.ConvolutionalLayer_1P(hidden_channels1, dataset.num_classes, reduction_type)
         self.dropout = ptens.modules.Dropout(prob=0.6,device = None)
 
     def forward(self, x, edge_index):
-        x = ptens.linmaps1(x)
+        x = ptens.linmaps1(x, False)
         x = self.conv1(x,edge_index)
         x = x.relu()
         x = self.dropout(x)
-        x = self.conv2(x,edge_index)
-        x = x.relu()
-        x = self.dropout(x)
-        x = self.conv3(x,edge_index)
-        x = x.relu()
-        x = self.dropout(x)
+      #  x = self.conv2(x,edge_index)
+      #  x = x.relu()
+      #  x = self.dropout(x)
+      #  x = self.conv3(x,edge_index)
+      #  x = x.relu()
+      #  x = self.dropout(x)
         x = self.conv4(x, edge_index)
-        x = ptens.linmaps0(x)
+        x = ptens.linmaps0(x, False)
         return x
 
 def train():
@@ -64,35 +63,23 @@ def test():
       return train_acc, test_acc
 
     
-model = P1GCN(hidden_channels1 = 256, hidden_channels2 = 128, hidden_channels3 = 64, reduction_type = "mean") # subject to change
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+model = P1GCN(hidden_channels1 = 256, reduction_type = "mean") # subject to change
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=8e-4)
 criterion = torch.nn.CrossEntropyLoss()
-for epoch in range(1, 601):
+for epoch in range(1, 201):
     loss = train()
     train_acc, test_acc = test()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
+    print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-Cornell
-round1:
-num_train_per_class = 70, num_val = 3, num_test = 110
-dropout prob = 0.6
-hidden_channels = 256, reduction_type = "mean"
-epoches = 600
-Train Accuracy: 0.38011695906432746 . Test Accuracy: 0.0 .
-=================================================================
-round2:
-num_train_per_class = 70, num_val = 3, num_test = 110
-dropout prob = 0.6
-hidden_channels = 256, reduction_type = "sum"
-epoches = 600
-Train Accuracy: 0.3508771929824561 . Test Accuracy: 0.0 .
-=================================================================
-round3:
-num_train_per_class = 70, num_val = 3, num_test = 110
-dropout prob = 0.6
-hidden_channels1 = 256, hidden_channels2 = 128, hidden_channels3 = 64, reduction_type = "mean"
-epoches = 600
-Train Accuracy: 0.26900584795321636 . Test Accuracy: 0.0 .
-"""
+# hidden_channels1 = 256, hidden_channels2 = 128, hidden_channels3 = 64, reduction_type = "mean"
+# lr=0.01, weight_decay=5e-4
+# Epoch: 335, Loss: 134.0845
+# Train Accuracy: 0.241864406779661 . Test Accuracy: 0.2222222222222222 .
+# hidden_channels1 = 256, hidden_channels2 = 128, hidden_channels3 = 64, reduction_type = "mean"
+# =================================================================
+# lr=0.01, weight_decay=5e-4
+# unnormalized linmaps
+# Epoch: 200, Loss: 129.5781
+# Train Accuracy: 0.22033898305084745 . Test Accuracy: 0.19444444444444445 .
+
