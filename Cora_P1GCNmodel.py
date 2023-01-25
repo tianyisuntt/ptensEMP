@@ -5,10 +5,10 @@ from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from Transforms import ToPtens_Batch
 dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
-data = dataset[0]  # Get the first graph object.
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 500,
-                                  num_val = 300)
+data = dataset[0] 
+transform_nodes = RandomNodeSplit(split = 'train_rest',
+                                  num_val = 433,
+                                  num_test = 540)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -22,13 +22,14 @@ class P1GCN(torch.nn.Module):
         self.dropout = ptens.modules.Dropout(prob=0.5,device = None)
 
     def forward(self, x, edge_index):
-        x = ptens.linmaps1(x)
+        x = ptens.linmaps1(x, False)
         x = self.conv1(x,edge_index)
         x = x.relu()
         x = self.dropout(x)
         x = self.conv2(x, edge_index)
-        x = ptens.linmaps0(x)
+        x = ptens.linmaps0(x, False)
         return x
+
 
 def train():
       model.train()
@@ -51,19 +52,19 @@ def test():
       return train_acc, test_acc
 
     
-model = P1GCN(hidden_channels = 32, reduction_type = "mean") # subject to change
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+model = P1GCN(hidden_channels = 32, reduction_type = "mean") 
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=8e-4)
 criterion = torch.nn.CrossEntropyLoss()
 for epoch in range(1, 201):
     loss = train()
     train_acc, test_acc = test()
-    #print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
-print('=================================================================')
-"""
-Dataset: Cora
-hidden_channels = 32
-reduction_type = "mean"
-epoches = 200
-Train Accuracy: 0.6740585774058577 . Test Accuracy: 0.8333333333333334 .
-"""
+    print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
+    print(f'Train acc:{train_acc:.4f}, Test acc:{test_acc:.4f}')
+#print("Epoch:", epoch, ", Loss:" loss, ", Train Accuracy:", train_acc, ", Test Accuracy:", test_acc, ".")
+print("=================================================================")
+#"""
+# lr=0.001, weight_decay=8e-4
+# train/valid/test = 64/16/20 
+# Epoch: 200, Loss: 1.3336
+# Train Accuracy: 0.7230046948356808 . Test Accuracy: 0.6481203007518797 .
+# 

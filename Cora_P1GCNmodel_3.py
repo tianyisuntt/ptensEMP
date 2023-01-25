@@ -12,9 +12,9 @@ print(f'Number of features: {dataset.num_features}')
 print(f'Number of classes: {dataset.num_classes}')
 
 data = dataset[0]
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 500,
-                                  num_val = 300)
+transform_nodes = RandomNodeSplit(split = 'train_rest',
+                                  num_val = 433,
+                                  num_test = 540)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
