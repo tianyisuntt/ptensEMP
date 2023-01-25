@@ -65,7 +65,7 @@ def test():
       return train_acc, test_acc
 
     
-model = P1GCN(embedding_dim = 256, hidden_channels = 128, reduction_type = "mean") # subject to change
+model = P1GCN(embedding_dim = 256, hidden_channels = 128, reduction_type = "mean") 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=8e-4)
 criterion = torch.nn.CrossEntropyLoss()
 for epoch in range(1, 601):
@@ -74,5 +74,7 @@ for epoch in range(1, 601):
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
     print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
+# embedding_dim = 256, hidden_channels = 128, reduction_type = "mean"
+# lr=0.001, weight_decay=8e-4
 #Epoch: 249, Loss: 1.6202
 #Train Accuracy: 0.2457627118644068 . Test Accuracy: 0.2222222222222222 .
