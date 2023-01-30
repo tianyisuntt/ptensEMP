@@ -6,9 +6,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from Transforms import ToPtens_Batch
 dataset = Planetoid(root='data/Planetoid', name='PubMed', transform=NormalizeFeatures())
 data = dataset[0] 
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 6300,
-                                  num_val = 500)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 3154,
+                                  num_test = 3943)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -57,9 +57,4 @@ for epoch in range(1, 201):
     #print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-PubMed:
-hidden_channels = 32
-epoches = 200
-Train Accuracy: 0.798958270969287 . Test Accuracy: 0.8532219570405728 .
-"""
+

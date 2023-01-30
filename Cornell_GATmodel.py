@@ -7,10 +7,9 @@ from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 dataset = WebKB(root='data/WebKB', name='Cornell', transform=NormalizeFeatures())
 data = dataset[0]  
-transform_nodes = RandomNodeSplit(split = 'random', 
-                                 num_train_per_class = 70,
-                                 num_val = 3, 
-                                 num_test = 110)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 29,
+                                  num_test = 36)
 data = transform_nodes(data)
 
 class GAT(torch.nn.Module): 

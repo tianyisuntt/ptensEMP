@@ -8,10 +8,9 @@ dataset = WebKB(root='data/WebKB', name='Cornell', transform=NormalizeFeatures()
 data = dataset[0]
 
 Normalization = PreComputeNorm()
-transform_nodes = RandomNodeSplit(split = 'random', 
-                                 num_train_per_class = 70,
-                                 num_val = 3, 
-                                 num_test = 110)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 29,
+                                  num_test = 36)
 on_learn_transform = ToPtens_Batch()
 
 data = Normalization(data)
@@ -61,11 +60,4 @@ for epoch in range(1, 601):
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-Cornell
-num_train_per_class = 70, num_val = 3, num_test = 110
-dropout probability = 0.6
-hidden_channels = 256
-epoches = 600
-Train Accuracy: 0.631578947368421 . Test Accuracy: 0.8888888888888888 .
-"""
+

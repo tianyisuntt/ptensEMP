@@ -9,10 +9,10 @@ from torch_geometric.datasets import Planetoid
 from torch_geometric.transforms import NormalizeFeatures
 
 dataset = Planetoid(root='data/Planetoid', name='PubMed', transform=NormalizeFeatures())
-data = dataset[0]  # Get the first graph object.
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 6300,
-                                  num_val = 500)
+data = dataset[0]  
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 3154,
+                                  num_test = 3943)
 data = transform_nodes(data)
 
 class MLP(torch.nn.Module):
@@ -133,40 +133,4 @@ for epoch in range(1, 201):
     #print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-Dataset: PubMed():
-Data(x=[19717, 500], edge_index=[2, 88648], y=[19717], train_mask=[19717], val_mask=[19717], test_mask=[19717])
-Number of graphs: 1
-Number of features: 500
-Number of classes: 3
-Number of nodes: 19717
-Number of edges: 88648
-Average node degree: 4.50
-Number of training nodes: 16703
-Training node label rate: 0.85
-Has isolated nodes: False
-Has self-loops: False
-Is undirected: True
-=================================================================
-GAT(
-  (conv1): GATConv(500, 256, heads=1)
-  (conv2): GATConv(256, 3, heads=1)
-)
-Train Accuracy: 0.8657726156977789 . Test Accuracy: 0.8663484486873508 .
-=================================================================
-GCN(
-  (conv1): GCNConv(500, 16)
-  (conv2): GCNConv(16, 3)
-)
-Train Accuracy: 0.8631383583787343 . Test Accuracy: 0.8655529037390612 .
-=================================================================
-MLP(
-  (lin1): Linear(in_features=500, out_features=256, bias=True)
-  (lin2): Linear(in_features=256, out_features=168, bias=True)
-  (lin3): Linear(in_features=168, out_features=32, bias=True)
-  (lin4): Linear(in_features=32, out_features=3, bias=True)
-)
-Train Accuracy: 0.991079446805963 . Test Accuracy: 0.8802704852824185 .
-=================================================================
 
-"""

@@ -7,10 +7,9 @@ from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 dataset = WebKB(root='data/WebKB', name='Cornell', transform=NormalizeFeatures())
 data = dataset[0]  
-transform_nodes = RandomNodeSplit(split = 'random', 
-                                 num_train_per_class = 70,
-                                 num_val = 3, 
-                                 num_test = 110)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 29,
+                                  num_test = 36)
 data = transform_nodes(data)
 
 class MLP(torch.nn.Module):
@@ -82,33 +81,3 @@ for epoch in range(1, 201):
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
 
-"""
-Dataset: cornell():
-Data(x=[183, 1703], edge_index=[2, 298], y=[183], train_mask=[183], val_mask=[183], test_mask=[183])
-Number of graphs: 1
-Number of features: 1703
-Number of classes: 5
-Number of nodes: 183
-Number of edges: 298
-Average node degree: 1.63
-Number of training nodes: 171
-Training node label rate: 0.93
-Has isolated nodes: False
-Has self-loops: True
-Is undirected: False
-=================================================================
-MLP(
-  (lin1): Linear(in_features=1703, out_features=168, bias=True)
-  (lin2): Linear(in_features=168, out_features=168, bias=True)
-  (lin3): Linear(in_features=168, out_features=32, bias=True)
-  (lin4): Linear(in_features=32, out_features=5, bias=True)
-)
-dropout prob = 0.5
-epoches = 200
-Train Accuracy: 0.9005847953216374 . Test Accuracy: 0.8888888888888888 .
-=================================================================
-V
-dropout prob = 0.6
-epoches = 200
-Train Accuracy: 0.9122807017543859 . Test Accuracy: 0.8888888888888888 .
-"""

@@ -6,9 +6,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from Transforms import ToPtens_Batch
 dataset = Amazon(root='data/Amazon', name='Photo', transform=NormalizeFeatures())
 data = dataset[0] 
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 1250, 
-                                  num_val = 500)  
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 1224,
+                                  num_test = 1530)  
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -57,10 +57,4 @@ for epoch in range(1, 201):
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-AmazonPhoto:
-num_train_per_class = 1250, num_val = 500
-hidden_channels = 32
-epoches = 200
-Train Accuracy: 0.8016250191629618 . Test Accuracy: 0.8421052631578947 .
-"""
+

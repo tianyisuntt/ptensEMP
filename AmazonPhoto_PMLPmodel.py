@@ -6,9 +6,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 
 dataset = Amazon(root='data/Amazon', name='Photo', transform=NormalizeFeatures())
 data = dataset[0]  # Get the first graph object.
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 1250,
-                                  num_val = 500)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 1224,
+                                  num_test = 1530) 
 data = transform_nodes(data)
 
 
@@ -64,5 +64,5 @@ AmazonPhoto:
 num_train_per_class = 1250, num_val = 500
 hidden_channels = 256
 epoches = 200
-Train Accuracy: 0.49823700751188105 . Test Accuracy: 0.7527910685805422 .
+Train Accuracy: 
 """

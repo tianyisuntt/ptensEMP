@@ -6,10 +6,10 @@ from torch_geometric.datasets import Amazon
 from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 dataset = Amazon(root='data/Amazon', name='Photo', transform=NormalizeFeatures())
-data = dataset[0]  # Get the first graph object.
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 1250, 
-                                  num_val = 500)  
+data = dataset[0] 
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 1224,
+                                  num_test = 1530) 
 data = transform_nodes(data)
 
 class MLP(torch.nn.Module):
@@ -131,39 +131,3 @@ for epoch in range(1, 201):
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
 
-"""
-Dataset: AmazonPhoto():
-Data(x=[7650, 745], edge_index=[2, 238162], y=[7650], train_mask=[7650], val_mask=[7650], test_mask=[7650])
-Number of graphs: 1
-Number of features: 745
-Number of classes: 8
-Number of nodes: 7650
-Number of edges: 238162
-Average node degree: 31.13
-Number of training nodes: 6523
-Training node label rate: 0.85
-Has isolated nodes: True
-Has self-loops: False
-Is undirected: True
-=================================================================
-GAT(
-  (conv1): GATConv(745, 256, heads=1)
-  (conv2): GATConv(256, 8, heads=1)
-)
-Train Accuracy: 0.878736777556339 . Test Accuracy: 0.9314194577352473 .
-=================================================================
-GCN(
-  (conv1): GCNConv(745, 16)
-  (conv2): GCNConv(16, 8)
-)
-Train Accuracy: 0.5344166794419746 . Test Accuracy: 0.8915470494417863 .
-=================================================================
-MLP(
-  (lin1): Linear(in_features=745, out_features=256, bias=True)
-  (lin2): Linear(in_features=256, out_features=168, bias=True)
-  (lin3): Linear(in_features=168, out_features=32, bias=True)
-  (lin4): Linear(in_features=32, out_features=8, bias=True)
-)
-Train Accuracy: 0.6211865705963514 . Test Accuracy: 0.9362041467304625 .
-=================================================================
-"""

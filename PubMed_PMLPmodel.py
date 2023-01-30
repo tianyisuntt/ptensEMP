@@ -5,12 +5,11 @@ from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 
 dataset = Planetoid(root='data/Planetoid', name='PubMed', transform=NormalizeFeatures())
-data = dataset[0]  # Get the first graph object.
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 6300,
-                                  num_val = 500)
+data = dataset[0] 
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 3154,
+                                  num_test = 3943)
 data = transform_nodes(data)
-
 
 class PMLP(torch.nn.Module):
     def __init__(self, hidden_channels):
@@ -55,13 +54,7 @@ criterion = torch.nn.CrossEntropyLoss()
 for epoch in range(1, 201):
     loss = train()
     train_acc, test_acc = test()
-    #print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
+    print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
+    print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
 
-"""
-PubMed:
-hidden_channels = 256
-epoches = 200
-Train Accuracy: 0.8464946416811351 . Test Accuracy: 0.8770883054892601 .
-"""

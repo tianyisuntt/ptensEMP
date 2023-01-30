@@ -14,30 +14,22 @@ on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
 
 class P1GCN(torch.nn.Module):
-    def __init__(self, embedding_dim, hidden_channels, reduction_type):
+    def __init__(self, hidden_channels, reduction_type):
         super().__init__()
         torch.manual_seed(12345)
-        self.lin1 = ptens.modules.Linear(dataset.num_features, embedding_dim)
-        self.conv1 = ptens.modules.ConvolutionalLayer_1P(embedding_dim, hidden_channels, reduction_type)
-        self.conv2 = ptens.modules.ConvolutionalLayer_1P(hidden_channels, hidden_channels, reduction_type)
-        self.conv3 = ptens.modules.ConvolutionalLayer_1P(hidden_channels, hidden_channels, reduction_type)
-        self.batchnorm = ptens.modules.BatchNorm(hidden_channels) 
-        self.lin2 = ptens.modules.Linear(hidden_channels, dataset.num_classes)
-        self.lin3 = ptens.modules.Linear(dataset.num_classes, dataset.num_classes)
+        self.conv1 = ptens.modules.ConvolutionalLayer_1P(dataset.num_features, hidden_channels, reduction_type)
+        self.conv2 = ptens.modules.ConvolutionalLayer_1P(hidden_channels, dataset.num_classes, reduction_type)
         self.dropout = ptens.modules.Dropout(prob=0.5,device = None)
 
     def forward(self, x, edge_index):
         x = ptens.linmaps1(x, False)
-        x = self.lin1(x).relu()
-        x = self.dropout(x)
         x = self.conv1(x,edge_index)
-        x = self.conv2(x,edge_index)
-        x = self.conv3(x,edge_index)
-        x = self.batchnorm(x)
-        x = self.lin2(x).relu()
+        x = x.relu()
         x = self.dropout(x)
-        x = self.lin3(x)
-        x = ptens.linmaps0(x, False)
+        x = self.conv2(x, edge_index)
+        x = ptens.linmaps0(x, False).torch()
+        x = F.log_softmax(x, dim=1)
+        x = ptens.ptensors0.from_matrix(x)
         return x
 
 def train():
@@ -61,7 +53,7 @@ def test():
       return train_acc, test_acc
 
     
-model = P1GCN(embedding_dim = 64, hidden_channels = 32, reduction_type = "mean") # subject to change
+model = P1GCN(hidden_channels = 32, reduction_type = "mean") 
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=8e-4)
 criterion = torch.nn.CrossEntropyLoss()
 for epoch in range(1, 201):

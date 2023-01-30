@@ -5,10 +5,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from torch_geometric.datasets import WebKB
 dataset = WebKB(root='data/WebKB', name='Wisconsin', transform=NormalizeFeatures())
 data = dataset[0]  
-transform_nodes = RandomNodeSplit(split = 'random', 
-                                 num_train_per_class = 100,
-                                 num_val = 1, 
-                                 num_test = 150)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 40,
+                                  num_test = 50)
 data = transform_nodes(data)
 
 
@@ -59,10 +58,3 @@ for epoch in range(1, 201):
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
 
-"""
-Wisconsin
-num_train_per_class = 100, num_val = 1, num_test = 150
-hidden_channels = 32
-epoches = 200
-Train Accuracy: 0.8497854077253219 . Test Accuracy: 1.0 .
-"""
