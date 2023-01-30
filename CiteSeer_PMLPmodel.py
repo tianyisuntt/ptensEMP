@@ -6,9 +6,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 
 dataset = Planetoid(root='data/Planetoid', name='CiteSeer', transform=NormalizeFeatures())
 data = dataset[0]  
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 510,
-                                  num_val = 500)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 532,
+                                  num_test = 665)
 data = transform_nodes(data)
 
 
@@ -63,5 +63,5 @@ CiteSeer:
 num_train_per_class = 510, num_val = 500
 hidden_channels = 256
 epoches = 200
-Train Accuracy: 0.7339971550497866 . Test Accuracy: 0.8666666666666667 .
+Train Accuracy: 
 """

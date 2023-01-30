@@ -6,12 +6,10 @@ from torch_geometric.datasets import WebKB
 from Transforms import PreComputeNorm
 dataset = WebKB(root='data/WebKB', name='Cornell', transform=NormalizeFeatures())
 data = dataset[0]
-
 Normalization = PreComputeNorm()
-transform_nodes = RandomNodeSplit(split = 'random', 
-                                 num_train_per_class = 70,
-                                 num_val = 3, 
-                                 num_test = 110)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 29,
+                                  num_test = 36)
 data = Normalization(data)
 data = transform_nodes(data)
 

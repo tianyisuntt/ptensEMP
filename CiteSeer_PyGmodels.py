@@ -10,9 +10,9 @@ from torch_geometric.transforms import NormalizeFeatures
 
 dataset = Planetoid(root='data/Planetoid', name='CiteSeer', transform=NormalizeFeatures())
 data = dataset[0]  
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 510,
-                                  num_val = 500)
+transform_nodes = RandomNodeSplit(split = 'train_rest', 
+                                  num_val = 532,
+                                  num_test = 665)
 data = transform_nodes(data)
 
 class MLP(torch.nn.Module):
@@ -136,47 +136,4 @@ for epoch in range(1, 201):
     #print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-Dataset: CiteSeer():
-Data(x=[3327, 3703], edge_index=[2, 9104], y=[3327], train_mask=[3327], val_mask=[3327], test_mask=[3327])
-Number of graphs: 1
-Number of features: 3703
-Number of classes: 6
-Number of nodes: 3327
-Number of edges: 9104
-Average node degree: 2.74
-Number of training nodes: 2812
-Training node label rate: 0.85
-Has isolated nodes: True
-Has self-loops: False
-Is undirected: True
-=================================================================
-GAT(
-  (conv1): GATConv(3703, 256, heads=1)
-  (conv2): GATConv(256, 6, heads=1)
-)
-Train Accuracy: 0.8559743954480796 . Test Accuracy: 0.8666666666666667 .
-=================================================================
-GCN(
-  (conv1): GCNConv(3703, 16)
-  (conv2): GCNConv(16, 6)
-)
-Train Accuracy: 0.786628733997155 . Test Accuracy: 0.8 .
-=================================================================
-round1:
-MLP(
-  (lin1): Linear(in_features=3703, out_features=256, bias=True)
-  (lin2): Linear(in_features=256, out_features=168, bias=True)
-  (lin3): Linear(in_features=168, out_features=32, bias=True)
-  (lin4): Linear(in_features=32, out_features=6, bias=True)
-)
-Train Accuracy: 0.9964438122332859 . Test Accuracy: 0.7333333333333333 .
-=================================================================
-round2:
-MLP(
-  (lin1): Linear(in_features=3703, out_features=256, bias=True)
-  (lin2): Linear(in_features=256, out_features=6, bias=True)
-)
-Train Accuracy: 0.9406116642958748 . Test Accuracy: 0.8 .
-=================================================================
-"""
+

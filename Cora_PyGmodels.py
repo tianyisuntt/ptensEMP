@@ -7,9 +7,9 @@ from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
 data = dataset[0]  # Get the first graph object.
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 500,
-                                  num_val = 300)
+transform_nodes = RandomNodeSplit(split = 'train_rest',
+                                  num_val = 433,
+                                  num_test = 540)
 data = transform_nodes(data)
 
 class MLP(torch.nn.Module):
@@ -85,7 +85,6 @@ def test():
 
 print(f'Dataset: {dataset}:')
 print(data)
-# Data(x=[2708, 1433], edge_index=[2, 10556], y=[2708], train_mask=[2708], val_mask=[2708], test_mask=[2708])
 print(f'Number of graphs: {len(dataset)}')
 print(f'Number of features: {dataset.num_features}')
 print(f'Number of classes: {dataset.num_classes}')
@@ -133,39 +132,38 @@ print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
 
 """
-Dataset: Cora
-hidden_channels = 256
-epoches = 200
+Dataset: Cora():
+Data(x=[2708, 1433], edge_index=[2, 10556], y=[2708], train_mask=[2708], val_mask=[2708], test_mask=[2708])
+Number of graphs: 1
+Number of features: 1433
+Number of classes: 7
+Number of nodes: 2708
+Number of edges: 10556
+Average node degree: 3.90
+Number of training nodes: 1735
+Training node label rate: 0.64
+Has isolated nodes: False
+Has self-loops: False
+Is undirected: True
+=================================================================
 GAT(
   (conv1): GATConv(1433, 256, heads=1)
   (conv2): GATConv(256, 7, heads=1)
 )
-Train Accuracy: 0.9372384937238494 . Test Accuracy: 0.9444444444444444 .
+Train Accuracy: 0.9556195965417867 . Test Accuracy: 0.8925925925925926 .
 =================================================================
-Dataset: Cora
-hidden_channels=16
-epoches = 200
 GCN(
   (conv1): GCNConv(1433, 16)
   (conv2): GCNConv(16, 7)
 )
-Train Accuracy: 0.907112970711297 . Test Accuracy: 1.0 .
+Train Accuracy: 0.8927953890489914 . Test Accuracy: 0.8814814814814815 .
 =================================================================
-Dataset: Cora
-hidden_channels = 256
-epoches = 200
-round1:
 MLP(
   (lin1): Linear(in_features=1433, out_features=256, bias=True)
-  (lin2): Linear(in_features=256, out_features=7, bias=True)
+  (lin2): Linear(in_features=256, out_features=168, bias=True)
+  (lin3): Linear(in_features=168, out_features=32, bias=True)
+  (lin4): Linear(in_features=32, out_features=7, bias=True)
 )
-Train Accuracy: 0.9757322175732217 . Test Accuracy: 0.7777777777777778 .
-round2:
-MLP(
-  (lin1): Linear(in_features=1433, out_features=256, bias=True)
-  (lin2): Linear(in_features=256, out_features=32, bias=True)
-  (lin3): Linear(in_features=32, out_features=7, bias=True)
-)
-Train Accuracy: 0.999581589958159 . Test Accuracy: 0.8333333333333334 .
+Train Accuracy: 0.9948126801152738 . Test Accuracy: 0.6925925925925925 .
 =================================================================
 """

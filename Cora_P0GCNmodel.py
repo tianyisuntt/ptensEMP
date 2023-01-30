@@ -6,9 +6,9 @@ from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from Transforms import ToPtens_Batch
 dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
 data = dataset[0]  # Get the first graph object.
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 500,
-                                  num_val = 300)
+transform_nodes = RandomNodeSplit(split = 'train_rest',
+                                  num_val = 433,
+                                  num_test = 540)
 data = transform_nodes(data)
 on_learn_transform = ToPtens_Batch()
 data = on_learn_transform(data)
@@ -20,7 +20,7 @@ class P0GCN(torch.nn.Module):
         torch.manual_seed(12345)
         self.conv1 = ptens.modules.ConvolutionalLayer_0P(dataset.num_features, hidden_channels)
         self.conv2 = ptens.modules.ConvolutionalLayer_0P(hidden_channels, dataset.num_classes)
-        self.dropout = ptens.modules.Dropout(prob=0.5)
+        self.dropout = ptens.modules.Dropout(prob=0.5, device = None)
 
     def forward(self, x, edge_index):
       #  x = ptens.ptensors0.from_matrix(x)
@@ -65,9 +65,4 @@ for epoch in range(1, 201):
     #print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
 print("Train Accuracy:", train_acc, ". Test Accuracy:", test_acc, ".")
 print('=================================================================')
-"""
-Dataset: Cora
-hidden_channels = 32
-epoches = 200
-Train Accuracy: 0.8652719665271966 . Test Accuracy: 0.9444444444444444 .
-"""
+

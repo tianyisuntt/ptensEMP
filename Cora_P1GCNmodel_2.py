@@ -29,7 +29,9 @@ class P1GCN(torch.nn.Module):
         x = self.dropout(x)
         x = self.conv2(x, edge_index)
         x = ptens.linmaps0(x, False).torch()
-        x = F.log_softmax(x, dim=1)
+        x = torch.sum(x, 0)
+        #print(x.shape)
+        x = F.log_softmax(x, dim = 1)
         x = ptens.ptensors0.from_matrix(x)
         return x
 

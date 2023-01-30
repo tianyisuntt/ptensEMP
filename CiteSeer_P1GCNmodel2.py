@@ -73,3 +73,5 @@ for epoch in range(1, 201):
 print('=================================================================')
 # Epoch: 022, Loss: 4.6239
 # Train Accuracy: 0.21032863849765257 . Test Accuracy: 0.18045112781954886 .
+# Epoch: 021, Loss: 5.0234
+# Train Accuracy: 0.24553990610328638 . Test Accuracy: 0.2661654135338346 .

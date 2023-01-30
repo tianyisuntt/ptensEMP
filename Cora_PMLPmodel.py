@@ -5,10 +5,10 @@ from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 
 dataset = Planetoid(root='data/Planetoid', name='Cora', transform=NormalizeFeatures())
-data = dataset[0]  # Get the first graph object.
-transform_nodes = RandomNodeSplit(split = 'test_rest', 
-                                  num_train_per_class = 500,
-                                  num_val = 300)
+data = dataset[0] 
+transform_nodes = RandomNodeSplit(split = 'train_rest',
+                                  num_val = 433,
+                                  num_test = 540)
 data = transform_nodes(data)
 
 
@@ -64,5 +64,5 @@ print('=================================================================')
 Dataset: Cora
 hidden_channels = 256
 epoches = 200
-Train Accuracy: 0.8631799163179916 . Test Accuracy: 0.8888888888888888 .
+Train Accuracy: 
 """
