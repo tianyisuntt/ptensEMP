@@ -1,5 +1,6 @@
 import torch
 import ptens
+from Cornell_models import *
 from torch_geometric.transforms import NormalizeFeatures
 from torch_geometric.transforms.random_node_split import RandomNodeSplit
 from torch_geometric.datasets import WebKB
