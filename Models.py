@@ -155,18 +155,18 @@ class SubGraph(torch.nn.Module):
     def __init__(self, hidden_channels, subgraph):
         super().__init__()
         torch.manual_seed(12345)
-        self.uniteconv1 = m.LazyUnite(hidden_channels)
-        self.batchnorm1 = m.LazyBatchNorm()
-        self.dropout1 = m.Dropout(prob=0.5, device = None)
-        self.graphconv1 = m.LazyHigherGraphConv(hidden_channels)
-        self.batchnorm2 = m.LazyBatchNorm()
-        self.dropout2 = m.Dropout(prob=0.5, device = None)
-        self.transferconv1 = m.LazyTransfer(hidden_channels)
-        self.batchnorm2 = m.LazyBatchNorm()
-        self.dropout3 = m.Dropout(prob=0.5, device = None)
-        self.linear1 = m.LazyLinear(hidden_channels)
-        self.batchnorm3 = m.LazyBatchNorm()
-        self.dropout4 = m.Dropout(prob=0.5, device = None)       
+        self.uniteconv1 = ptens.modules.LazyUnite(hidden_channels)
+        self.batchnorm1 = ptens.modules.LazyBatchNorm()
+        self.dropout1 = ptens.modules.Dropout(prob=0.5, device = None)
+        self.graphconv1 = ptens.modules.LazyHigherGraphConv(hidden_channels)
+        self.batchnorm2 = ptens.modules.LazyBatchNorm()
+        self.dropout2 = ptens.modules.Dropout(prob=0.5, device = None)
+        self.transferconv1 = ptens.modules.LazyTransfer(hidden_channels)
+        self.batchnorm2 = ptens.modules.LazyBatchNorm()
+        self.dropout3 = ptens.modules.Dropout(prob=0.5, device = None)
+        self.linear1 = ptens.modules.LazyLinear(hidden_channels)
+        self.batchnorm3 = ptens.modules.LazyBatchNorm()
+        self.dropout4 = ptens.modules.Dropout(prob=0.5, device = None)       
     def forward(self, x, edge_index):
     # input is a torch tensor
         x = ptens.ptensors0.from_matrix(x)
@@ -190,15 +190,15 @@ class GraphTransfer(torch.nn.Module):
     def __init__(self, in_channels, out_channels, hidden_channels, subgraph):
       super().__init__()
       torch.manual_seed(12345)
-      self.uniteconv1 = m.LazyUnite(in_channels,1)
-      self.batchnorm1 = m.LazyBatchNorm()
-      self.dropout1 = m.Dropout(prob=0.5, device = None)
-      self.graphconv1 = m.LazyHigherGraphConv(hidden_channels)
-      self.batchnorm2 = m.LazyBatchNorm()
-      self.dropout2 = m.Dropout(prob=0.5, device = None)
-      self.graphconv2 = m.LazyHigherGraphConv(hidden_channels)
-      self.batchnorm3 = m.LazyBatchNorm()
-      self.dropout3 = m.Dropout(prob=0.5, device = None)
+      self.uniteconv1 = ptens.modules.LazyUnite(in_channels,1)
+      self.batchnorm1 = ptens.modules.LazyBatchNorm()
+      self.dropout1 = ptens.modules.Dropout(prob=0.5, device = None)
+      self.graphconv1 = ptens.modules.LazyHigherGraphConv(hidden_channels)
+      self.batchnorm2 = ptens.modules.LazyBatchNorm()
+      self.dropout2 = ptens.modules.Dropout(prob=0.5, device = None)
+      self.graphconv2 = ptens.modules.LazyHigherGraphConv(hidden_channels)
+      self.batchnorm3 = ptens.modules.LazyBatchNorm()
+      self.dropout3 = ptens.modules.Dropout(prob=0.5, device = None)
       self.subgraphconv = SubGraph(hidden_channels, subgraph)
       self.lin1 = torch.nn.Linear(2*hidden_channels,hidden_channels)
       self.activ1 = torch.nn.ReLU(True)
@@ -232,13 +232,3 @@ class GraphTransfer(torch.nn.Module):
       
 
 
-    
-        
-        
-  
-
-
-
-
-
-        
