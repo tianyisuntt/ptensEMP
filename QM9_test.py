@@ -1,7 +1,7 @@
 import os
 import torch
 import ptens
-from typinng import Callable
+from typing import Callable
 from time import monotonic
 from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import QM9
