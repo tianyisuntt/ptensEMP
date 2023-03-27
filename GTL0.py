@@ -3,11 +3,11 @@ import torch
 import ptens
 import torch.nn as nn
 
-def 3x3(in_p, out_p, stride = 1, groups = 1):
+def conv3x3(in_p, out_p, stride = 1, groups = 1):
     return nn.Conv2d(in_p, out_p, kernel_size = 3,
                      stride = stride, padding = 1, bias = False)
 
-def 1x1(in_p, out_p, stride = 1):
+def conv1x1(in_p, out_p, stride = 1):
     return nn.Conv2d(in_p, out_p, kernel_size = 1,
                      stride = stride, bias = False)
 
@@ -15,10 +15,10 @@ class BB(nn.Module):
     expansion = 1
     def __init__(self, in_p, p, stride = 1, ps = None):
         super(BB, self).__init__()
-        self.conv1 = 3x3(in_p, p, stride)
+        self.conv1 = conv3x3(in_p, p, stride)
         self.bn1 = nn.BatchNorm2d(p)
         self.relu = nn.ReLU(inplace = True)
-        self.conv2 = 3x3(p, p)
+        self.conv2 = conv3x3(p, p)
         self.bn2 = nn.BatchNorm2d(p)
         self.ps = ps
         self.stride = stride
@@ -106,7 +106,7 @@ class RN(nn.Module):
                 norm_layer = nn.BatchNorm2d
             ps = None
             if stride != 1 or self.in_p != p * block.expansion:
-                ps = nn.Sequential(1x1(self.in_p, p*block.expansion, stride),
+                ps = nn.Sequential(conv1x1(self.in_p, p*block.expansion, stride),
                                    norm_layer(p, block.expansion),)
             layers = []
             layers.append(block(self.in_p, p, stride, ps, self.groups,
