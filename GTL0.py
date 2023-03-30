@@ -3,7 +3,7 @@ import torch
 import ptens
 import torch.nn as nn
 
-def guassian_kernel(source, target, kernel_mul = 2.0, kernel = 5, fix_sigma = None):
+def guassian_kernel(source, target, ker_m = 2.0, ker = 5, fix_sigma = None):
     n_samples = int(source.size()[0])+int(target.size()[0])
     tot = torch.cat([source, target],dim = 0)
     tot0 = torch.cat([source, target],dim = 0)
@@ -13,16 +13,16 @@ def guassian_kernel(source, target, kernel_mul = 2.0, kernel = 5, fix_sigma = No
         bandwidth = fix_sigma
     else:
         bandwidth = torch.sum(L2_distance.data)/(n_samples**2-n_samples)
-    bandwidth /= kernel_mul ** (kernel_num//2)
-    bandwidth_list = [bandwidth * (kernel_mul**i) for i in range(kernel_num)]
-    kernel_val = [torch.exp(-L2_distance/bandwidth_temp) for bandwidth_temp in bandwidth_list]
+    bandwidth /= ker_mul ** (ker_num//2)
+    bandwidth_list = [bandwidth * (ker_mul**i) for i in range(ker_num)]
+    ker_val = [torch.exp(-L2_distance/bandwidth_temp) for bandwidth_temp in bandwidth_list]
     return sum(kernel_val)
 
-def mmd_rbf_acc(source, target, kernel_mul = 2.0, kernel_num = 5, fix_sigma = None):
+def mmd_rbf_acc(source, target, ker_mul = 2.0, ker_num = 5, fix_sigma = None):
     batch_size = int(source.size()[0])
     kernels = gaussian_kernel(source, target,
-                              kernel_mul = kernel_mul,
-                              kernel_num = kernel_num,
+                              ker_mul = ker_mul,
+                              ker_num = ker_num,
                               fix_sigma = fix_sigma)
     loss = 0
     for i in range(batch_size):
@@ -32,11 +32,11 @@ def mmd_rbf_acc(source, target, kernel_mul = 2.0, kernel_num = 5, fix_sigma = No
         loss -= kernels[s1, t2] + kernels[s2, t1]
     return loss / float(batch_size)
 
-def mmd_rbf_noacc(source, target, kernel_mul = 2.0, kernel_num = 5, fix_sigma = None):
+def mmd_rbf_noacc(source, target, ker_mul = 2.0, ker_num = 5, fix_sigma = None):
     batch_size = int(source.size()[0])
     kernels = gaussian_kernel(source, target,
-                              kernel_mul = kernel_mul,
-                              kernel_num = kernel_num,
+                              ker_mul = ker_mul,
+                              ker_num = ker_num,
                               fix_sigma = fix_sigma)
     XX = kernels[:batch_size, :batch_size]
     YY = kernels[batch_size:, batch_size:]
