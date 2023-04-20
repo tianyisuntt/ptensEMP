@@ -60,7 +60,7 @@ class Model(torch.nn.Module):
         self.conv1 = ConvolutionalLayer(embedding_dim,   convolution_dim, 1)
         self.conv2 = ConvolutionalLayer(convolution_dim, convolution_dim, 2)
         self.conv3 = ConvolutionalLayer(convolution_dim, convolution_dim, 3)
-        self.conv4 = ConvolutionalLayer(convolution_dim, dense_dim,       4)
+        self.conv4 = ConvolutionalLayer(convolution_dim, dense_dim,       5)
         self.pooling = pooling
         self.batchnorm = torch.nn.BatchNorm1d(dense_dim)
         self.lin1 = torch.nn.Linear(dense_dim,dense_dim)
@@ -93,7 +93,7 @@ model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool)
 print(model)
 
 
-learning_rate = 0.005
+learning_rate = 0.0005
 weight_decay = 8E-4
 max_decay = 0.5
 optimizer = torch.optim.Adam(model.parameters(),
