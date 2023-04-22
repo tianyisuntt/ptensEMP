@@ -60,7 +60,7 @@ class Model(torch.nn.Module):
         self.conv1 = ConvolutionalLayer(embedding_dim,   convolution_dim, 1)
         self.conv2 = ConvolutionalLayer(convolution_dim, convolution_dim, 2)
         self.conv3 = ConvolutionalLayer(convolution_dim, convolution_dim, 3)
-        self.conv4 = ConvolutionalLayer(convolution_dim, dense_dim,       5)
+        self.conv4 = ConvolutionalLayer(convolution_dim, dense_dim,       4)
         self.pooling = pooling
         self.batchnorm = torch.nn.BatchNorm1d(dense_dim)
         self.lin1 = torch.nn.Linear(dense_dim,dense_dim)
