@@ -13,8 +13,9 @@ class CleanupData(BaseTransform):
         return data
 class ToPtens_Batch(BaseTransform):
     def __call__(self, data):
-        data.G = ptens.graph.from_matrix(torch.sparse_coo_tensor(data.edge_index,torch.ones(data.edge_index.size(1),dtype=torch.float32),
-                                                             size=(data.num_nodes,data.num_nodes)).to_dense())
+        data.G = ptens.graph.from_matrix(torch.sparse_coo_tensor(
+            data.edge_index,torch.ones(data.edge_index.size(1),dtype=torch.float32),
+            size=(data.num_nodes,data.num_nodes)).to_dense())
         return data
 
 on_process_transform = CleanupData()
