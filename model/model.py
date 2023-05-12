@@ -1,11 +1,6 @@
-import os
 import torch
 import ptens
-from typing import Callable
-from time import monotonic
-from torch_geometric.loader import DataLoader
-from torch_geometric.datasets import QM9
-from troch_geometric.nn import Sequential, global_add_pool, 
+
 
 class ConvolutionalLayer(torch.nn.Module):
     def __init__(self,channels_in: int,channels_out: int,nhops: int) -> None:
