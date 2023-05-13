@@ -1,13 +1,13 @@
 from time import monotonic
 from torch_geometric.nn import global_mean_pool
 from model import Model
+
 embedding_dim = 64
 convolution_dim = 300
 dense_dim = 600
 reduction_type = 'mean'
 model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool)
 print(model)
-
 
 learning_rate = 0.005
 weight_decay = 8E-4
