@@ -1,14 +1,6 @@
-import torch
-import ptens
-from typing import Callable
 from time import monotonic
-from torch_geometric.loader import DataLoader
-from torch_geometric.datasets import QM9
-from torch_geometric.nn import Sequential, global_add_pool, global_mean_pool
-from torch_geometric.transforms import BaseTransform, Compose, NormalizeFeatures
-from Trasnforms import PreComputeNorm, ToPtens_Batch
-
-
+from torch_geometric.nn import global_mean_pool
+from model import Model
 embedding_dim = 64
 convolution_dim = 300
 dense_dim = 600
