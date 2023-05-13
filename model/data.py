@@ -22,9 +22,7 @@ on_process_transform = CleanupData()
 on_learn_transform = ToPtens_Batch()
 
 dataset = QM9(root = 'data/QM9/', pre_transform=on_process_transform)
-print('dataset', dataset)
 train_set, val_set, test_set = torch.utils.data.random_split(dataset, [110831,10000,10000])
-print(len(train_set), len(val_set), len(test_set))
 batch_size = 32
 train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, prefetch_factor=2)
 valid_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False, prefetch_factor=2)
