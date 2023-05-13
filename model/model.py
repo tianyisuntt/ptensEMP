@@ -1,6 +1,5 @@
 import torch
 import ptens
-
 class ConvolutionalLayer(torch.nn.Module):
     def __init__(self,channels_in: int,channels_out: int,nhops: int) -> None:
         super().__init__()
