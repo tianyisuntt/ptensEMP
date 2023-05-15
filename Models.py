@@ -42,7 +42,6 @@ class ConvolutionalLayer(torch.nn.Module):
 class GPP(torch.nn.Module):
     # Graph property prediction
     def __init__(self, embedding_dim: int, convolution_dim: int, dense_dim: int,
-                 pooling: Callable[[torch.Tensor,torch.Tensor],torch.Tensor]) -> None:
         super().__init__()
         self.embedding = torch.nn.Linear(11,embedding_dim)
         self.conv1 = ConvolutionalLayer(embedding_dim,   convolution_dim, 1)
