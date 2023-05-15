@@ -1,28 +1,41 @@
-from time import monotonic
-from torch_geometric.nn import global_mean_pool
-from model import Model
+import argparse
+import torch
+from torch.optim import Adam
+from torch_geometric.data import DataLoader
 
-embedding_dim = 64
-convolution_dim = 300
-dense_dim = 600
-reduction_type = 'mean'
-model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool)
-print(model)
+parser = argparse.ArgumentParser()
+parser.add_argument('--device', type = int, default = 0)
+parser.add_argument('--root', 'data/QM9/')
+parser.add_argument('--embedding_dim', type = int, default = 64)
+parser.add_argument('--convolution_dim', type = int, default = 300)
+parser.add_argument('--dense_dim', type = int, default = 600)
+parser.add_argument('--reduction_type', type = str, default = 'mean')
+parser.add_argument('--learning_rate', type = int, default = 0.005)
+parser.add_argument('--weight_decay', type = str, default = 8E-4)
+parser.add_argument('--max_decay', type = int, default = 0.5)
+parser.add_argument('--target_index', type = int, default = 4)
+parser.add_argument('--t_start', type = int, default = monotonic())
+parser.add_argument('--epochs', type = int, default = 20)
+parser.add_argument('--best_validation_score', type = int, default = torch.inf)
+parser.add_argument('--epoch0', type = int, default = 0)
+parser.add_argument('--hidden_channels', type = int, default = 128)
+parser.add_argument('--num_layers', type = int, default = 3)
+parser.add_argument('--dropout', type = float, default = 0.0)
+parser.add_argument('--val_acc_history', type = list, default = [])
+parser.add_argument('--all_acc_history', type = list, default = [])
+args = parser.parse_args()
+print(args)
 
-learning_rate = 0.005
-weight_decay = 8E-4
-max_decay = 0.5
-optimizer = torch.optim.Adam(model.parameters(),
-                             learning_rate,
-                             weight_decay=weight_decay)
-criterion = torch.nn.MSELoss()
-sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
-                                                   verbose=True,
-                                                   factor=max_decay,
-                                                   mode = 'min',
-                                                   patience=4)
 
-target_index = 2
+dataset = WebKB(root=root, name=name, transform=NormalizeFeatures())
+data = dataset[0]
+
+split_idx = dataset.get_idx_split()
+train_dataset = dataset[split_idx['train']]
+val_dataset = dataset[split_idx['valid']]
+test_dataset = dataset[split_idx['test']]
+
+
 def compute_accuracy(loader):
     global target_index
     model.eval()
@@ -39,13 +52,6 @@ def compute_accuracy(loader):
     model.train()
     return torch.nn.functional.mse_loss(preds,targets)
 
-T = 0
-t_start = monotonic()
-epochs = 20 
-val_acc_history = []
-all_acc_history = []
-best_validation_score = torch.inf
-epoch0 = 0
 for epoch in range(epoch0 + 1,epochs):
     total = 0
     index = 0
@@ -62,7 +68,7 @@ for epoch in range(epoch0 + 1,epochs):
         if index % 10 == 0:
             print("\rEpoch %3d, batch: %5d/%5d, average loss: %7.5f, loss: %7.5f" \
                   % (epoch,index,len(train_loader),total/index,inc),end='',flush=True)
-
+            
     t1 = monotonic()
     dt = t1 - t0
     T += dt
@@ -86,6 +92,7 @@ for epoch in range(epoch0 + 1,epochs):
     sched.step(val_acc)
     print() 
 
-print("\ttrain mse:",compute_accuracy(train_loader))
-print("\tvalid mse:",compute_accuracy(valid_loader))
-print("\ttest  mse:",compute_accuracy(test_loader))
+
+print("\ttrain mse:", compute_accuracy(train_loader))
+print("\tvalid mse:", compute_accuracy(valid_loader))
+print("\ttest mse:", compute_accuracy(test_loader))
