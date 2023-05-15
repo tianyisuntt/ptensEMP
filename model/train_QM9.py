@@ -2,6 +2,7 @@ import argparse
 import torch
 from torch.optim import Adam
 from torch_geometric.data import DataLoader
+from model import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--device', type = int, default = 0)
@@ -30,10 +31,16 @@ print(args)
 dataset = WebKB(root=root, name=name, transform=NormalizeFeatures())
 data = dataset[0]
 
-split_idx = dataset.get_idx_split()
-train_dataset = dataset[split_idx['train']]
-val_dataset = dataset[split_idx['valid']]
-test_dataset = dataset[split_idx['test']]
+model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool)
+optimizer = torch.optim.Adam(model.parameters(),
+                             learning_rate,
+                             weight_decay=weight_decay)
+criterion = torch.nn.MSELoss()
+sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
+                                                   verbose=True,
+                                                   factor=max_decay,
+                                                   mode = 'min',
+                                                   patience=4)
 
 
 def compute_accuracy(loader):
