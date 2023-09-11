@@ -36,14 +36,18 @@ class ConvolutionalLayer(torch.nn.Module):
     def __init__(self,channels_in: int,channels_out: int,nhops: int) -> None:
         super().__init__()
         self.batchnorm1 = torch.nn.BatchNorm1d(channels_in * 2)
-        self.lin1 = torch.nn.Linear(channels_in * 2,channels_in)
+        self.lin1 = torch.nn.Linear(channels_in * 2, channels_in)
         self.activ1 = torch.nn.ReLU(True)
         self.batchnorm2 = torch.nn.BatchNorm1d(channels_in )
-        self.lin2 = torch.nn.Linear(channels_in ,channels_out)
+        self.lin2 = torch.nn.Linear(channels_in, channels_out)
         self.activ2 = torch.nn.ReLU(True)
         self.nhops = nhops
     def forward(self, x: ptens.ptensors1, G: ptens.graph) -> ptens.ptensors1:
-        x1 = x.transfer1(G.nhoods(self.nhops),G,False)
+        x1 = x.transfer1(G.nhoods(self.nhops), 
+                         G,False)
+        x1 = x1.transfer1(G.nhoods(self.nhops), 
+                         ptens.graph.overlaps(x,x1), 
+                         False) 
         atoms = x1.get_atoms()
         x2 = x1.torch()
         x2 = self.batchnorm1(x2)
