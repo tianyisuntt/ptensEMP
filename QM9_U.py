@@ -28,9 +28,9 @@ print('dataset', dataset)
 train_set, val_set, test_set = torch.utils.data.random_split(dataset, [110831,10000,10000])
 print(len(train_set), len(val_set), len(test_set))
 batch_size = 32
-train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, prefetch_factor=2)
-valid_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False, prefetch_factor=2)
-test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, prefetch_factor=2)
+train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, prefetch_factor=None)
+valid_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False, prefetch_factor=None)
+test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, prefetch_factor=None)
 
 class ConvolutionalLayer(torch.nn.Module):
     def __init__(self,channels_in: int,channels_out: int,nhops: int) -> None:
