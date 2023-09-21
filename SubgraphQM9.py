@@ -1,6 +1,8 @@
 import os
 import torch
 import ptens
+from ptens.modules import Linear
+
 from typing import Callable
 from time import monotonic
 from torch_geometric.loader import DataLoader
@@ -16,52 +18,35 @@ class CleanupData(BaseTransform):
         return data
 class ToPtens_Batch(BaseTransform):
     def __call__(self, data):
-        data.G = ptens.graph.from_matrix(torch.sparse_coo_tensor(data.edge_index,torch.ones(data.edge_index.size(1),dtype=torch.float32),
-                                                             size=(data.num_nodes,data.num_nodes)).to_dense())
+        #data.G = ptens.graph.from_matrix(torch.sparse_coo_tensor(data.edge_index,torch.ones(data.edge_index.size(1),dtype=torch.float32),
+        #size=(data.num_nodes,data.num_nodes)).to_dense())
+        data.G=ptens.ggraph.from_edge_index(data.edge_index.float(),data.num_nodes)
         return data
 
-on_process_transform = CleanupData()
-on_learn_transform = ToPtens_Batch()
-
-dataset = QM9(root = 'data/QM9/', pre_transform=on_process_transform)
-print('dataset', dataset)
-train_set, val_set, test_set = torch.utils.data.random_split(dataset, [110831,10000,10000])
-print(len(train_set), len(val_set), len(test_set))
-batch_size = 32
-train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, prefetch_factor=None)
-valid_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False, prefetch_factor=None)
-test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, prefetch_factor=None)
 
 class ConvolutionalLayer(torch.nn.Module):
     def __init__(self,channels_in: int,channels_out: int,nhops: int) -> None:
         super().__init__()
-        self.batchnorm1 = torch.nn.BatchNorm1d(channels_in * 2)
-        self.lin1 = torch.nn.Linear(channels_in * 2, channels_in)
-        self.activ1 = torch.nn.ReLU(True)
-        self.batchnorm2 = torch.nn.BatchNorm1d(channels_in )
-        self.lin2 = torch.nn.Linear(channels_in, channels_out)
-        self.activ2 = torch.nn.ReLU(True)
-        self.nhops = nhops
-    def forward(self, x: ptens.ptensors1, G: ptens.graph) -> ptens.ptensors1:
-        x1 = x.transfer1(G.nhoods(self.nhops), 
-                         G,False)
-        x1 = x1.transfer1(G.nhoods(self.nhops), 
-                         ptens.graph.overlaps(x,x1), 
-                         False) 
-        atoms = x1.get_atoms()
-        x2 = x1.torch()
-        x2 = self.batchnorm1(x2)
-        x2 = self.activ1(self.lin1(x2))
-        x2 = self.batchnorm2(x2)
-        x2 = self.activ2(self.lin2(x2))
-        x3 = ptens.ptensors1.from_matrix(x2,atoms)
-        return x3
+        #self.batchnorm1 = torch.nn.BatchNorm1d(channels_in * 2)
+        self.lin1 = ptens.modules.Linear(2*channels_in,channels_out) #torch.nn.Linear(2*channels_in,channels_out) 
+        #self.activ1 = torch.nn.ReLU(True)
+        #self.batchnorm2 = torch.nn.BatchNorm1d(channels_in )
+        #self.lin2 = torch.nn.Linear(channels_in ,channels_out)
+        #self.activ2 = torch.nn.ReLU(True)
+        self.nodes=ptens.subgraph.trivial()
+        self.edges=ptens.subgraph.edge()
 
-
-class SubgraphLayer(torch.nn.Module):
-    def __init__(self,channels_in: int,channels_out: int,nhops: int) -> None:
-        super().__init__()
-    def forward(self, x: ptens.ptensors1, G: ptens.graph) -> ptens.ptensors1:
+    def forward(self, x: ptens.ptensors1, G: ptens.ggraph) -> ptens.ptensors1:
+        a=ptens.subgraphlayer1.gather_from_ptensors(x,G,self.nodes)
+        b=ptens.subgraphlayer1.gather_from_ptensors(x,G,self.edges)
+        u=ptens.ptensors1.cat(a,b)
+        
+        #x2 = u.torch()
+        #x2 = self.batchnorm1(x2)
+        #x2 = self.activ1(self.lin1(x2))
+        x2=ptens.relu(self.lin1(u))
+        #x2 = ptens.ptensors1.from_matrix(x2,u.get_atoms()) 
+        return x2
 
 
 class Model(torch.nn.Module):
@@ -69,7 +54,7 @@ class Model(torch.nn.Module):
                  pooling: Callable[[torch.Tensor,torch.Tensor],torch.Tensor]) -> None:
         super().__init__()
         self.embedding = torch.nn.Linear(11,embedding_dim)
-        self.conv1 = ConvolutionalLayer(embedding_dim,   convolution_dim, 1)
+        self.conv1 = ConvolutionalLayer(embedding_dim,   convolution_dim, 1) # changed
         self.conv2 = ConvolutionalLayer(convolution_dim, convolution_dim, 2)
         self.conv3 = ConvolutionalLayer(convolution_dim, convolution_dim, 3)
         self.conv4 = ConvolutionalLayer(convolution_dim, dense_dim,       4)
@@ -80,6 +65,8 @@ class Model(torch.nn.Module):
         self.lin2 = torch.nn.Linear(dense_dim,dense_dim)
         self.activ2 = torch.nn.ReLU(True)
         self.lin3 = torch.nn.Linear(dense_dim,dense_dim)
+        self.node=ptens.subgraph.trivial()
+
     def forward(self, x: torch.Tensor, G: ptens.graph, batch: torch.Tensor) -> torch.Tensor:
         x = self.embedding(x)
         x = ptens.ptensors0.from_matrix(x)
@@ -88,7 +75,7 @@ class Model(torch.nn.Module):
         x = self.conv2(x,G)
         x = self.conv3(x,G)
         x = self.conv4(x,G)
-        x = ptens.linmaps0(x,False)
+        x = ptens.subgraphlayer0.gather_from_ptensors(x,G,self.node)
         x = x.torch()
         x = self.pooling(x,batch)
         x = self.batchnorm(x)
@@ -98,29 +85,42 @@ class Model(torch.nn.Module):
         return x
 
 
+
+
+# ---- Main --------------------------------------------------------------------------------------------------
+
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print("Traning model on GPU.")
+else:
+    device = torch.device("cpu")
+    print("Traning model on CPU.")
+
+on_process_transform = CleanupData()
+on_learn_transform = ToPtens_Batch()
+
+dataset = QM9(root = 'data/QM9/', pre_transform=on_process_transform)
+print('dataset', dataset)
+train_set, val_set, test_set = torch.utils.data.random_split(dataset, [110831,10000,10000])
+train_loader = DataLoader(train_set, batch_size=32, shuffle=True, prefetch_factor=None)
+valid_loader = DataLoader(val_set, batch_size=32, shuffle=False, prefetch_factor=None)
+test_loader = DataLoader(test_set, batch_size=32, shuffle=False, prefetch_factor=None)
+target_index = 8
+
 embedding_dim = 64
 convolution_dim = 300
 dense_dim = 600
-reduction_type = 'mean'
-model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool)
+model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool).to(device)
 print(model)
-
 
 learning_rate = 0.005
 weight_decay = 8E-4
 max_decay = 0.5
-optimizer = torch.optim.Adam(model.parameters(),
-                             learning_rate,
-                             weight_decay=weight_decay)
+optimizer = torch.optim.Adam(model.parameters(), learning_rate, weight_decay=weight_decay)
 criterion = torch.nn.MSELoss()
-sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
-                                                   verbose=True,
-                                                   factor=max_decay,
-                                                   mode = 'min',
-                                                   patience=4)
+sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, verbose=True, factor=max_decay, mode = 'min', patience=4)
 
 
-target_index = 11
 def compute_accuracy(loader):
     global target_index
     model.eval()
@@ -137,6 +137,7 @@ def compute_accuracy(loader):
     model.train()
     return torch.nn.functional.mse_loss(preds,targets)
 
+
 T = 0
 t_start = monotonic()
 epochs = 20 #200
@@ -144,16 +145,23 @@ val_acc_history = []
 all_acc_history = []
 best_validation_score = torch.inf
 epoch0 = 0
+
+
 for epoch in range(epoch0 + 1,epochs):
     total = 0
     index = 0
     t0 = monotonic()
     for subset in train_loader:
+        subset.to(device)
         batch = on_learn_transform(subset)
         optimizer.zero_grad()
+        print(1)
         loss = criterion(model(batch.x,batch.G,batch.batch)[:,target_index],batch.y[:,target_index])
+        print(2)
         loss.backward()
+        print(3)
         optimizer.step()
+        #print(loss)
         inc = loss.tolist()
         index += 1
         total += inc
