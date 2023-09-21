@@ -1,6 +1,8 @@
 import os
 import torch
 import ptens
+from ptens.modules import Linear
+
 from typing import Callable
 from time import monotonic
 from torch_geometric.loader import DataLoader
@@ -26,23 +28,24 @@ class ConvolutionalLayer(torch.nn.Module):
     def __init__(self,channels_in: int,channels_out: int,nhops: int) -> None:
         super().__init__()
         #self.batchnorm1 = torch.nn.BatchNorm1d(channels_in * 2)
-        self.lin1 = torch.nn.Linear(2*channels_in,channels_out)
-        self.activ1 = torch.nn.ReLU(True)
+        self.lin1 = ptens.modules.Linear(2*channels_in,channels_out) #torch.nn.Linear(2*channels_in,channels_out) 
+        #self.activ1 = torch.nn.ReLU(True)
         #self.batchnorm2 = torch.nn.BatchNorm1d(channels_in )
         #self.lin2 = torch.nn.Linear(channels_in ,channels_out)
         #self.activ2 = torch.nn.ReLU(True)
-        self.node=ptens.subgraph.trivial()
-        self.edge=ptens.subgraph.edge()
+        self.nodes=ptens.subgraph.trivial()
+        self.edges=ptens.subgraph.edge()
 
     def forward(self, x: ptens.ptensors1, G: ptens.ggraph) -> ptens.ptensors1:
-        a=ptens.subgraphlayer1.gather_from_ptensors(x,G,self.node)
-        b=ptens.subgraphlayer1.gather_from_ptensors(x,G,self.edge)
+        a=ptens.subgraphlayer1.gather_from_ptensors(x,G,self.nodes)
+        b=ptens.subgraphlayer1.gather_from_ptensors(x,G,self.edges)
         u=ptens.ptensors1.cat(a,b)
         
-        x2 = u.torch()
+        #x2 = u.torch()
         #x2 = self.batchnorm1(x2)
-        x2 = self.activ1(self.lin1(x2))
-        x2 = ptens.ptensors1.from_matrix(x2,u.get_atoms())
+        #x2 = self.activ1(self.lin1(x2))
+        x2=ptens.relu(self.lin1(u))
+        #x2 = ptens.ptensors1.from_matrix(x2,u.get_atoms()) 
         return x2
 
 
@@ -51,7 +54,7 @@ class Model(torch.nn.Module):
                  pooling: Callable[[torch.Tensor,torch.Tensor],torch.Tensor]) -> None:
         super().__init__()
         self.embedding = torch.nn.Linear(11,embedding_dim)
-        self.conv1 = ConvolutionalLayer(embedding_dim,   convolution_dim, 1)
+        self.conv1 = ConvolutionalLayer(embedding_dim,   convolution_dim, 1) # changed
         self.conv2 = ConvolutionalLayer(convolution_dim, convolution_dim, 2)
         self.conv3 = ConvolutionalLayer(convolution_dim, convolution_dim, 3)
         self.conv4 = ConvolutionalLayer(convolution_dim, dense_dim,       4)
@@ -83,8 +86,15 @@ class Model(torch.nn.Module):
 
 
 
+
 # ---- Main --------------------------------------------------------------------------------------------------
 
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print("Traning model on GPU.")
+else:
+    device = torch.device("cpu")
+    print("Traning model on CPU.")
 
 on_process_transform = CleanupData()
 on_learn_transform = ToPtens_Batch()
@@ -92,7 +102,7 @@ on_learn_transform = ToPtens_Batch()
 dataset = QM9(root = 'data/QM9/', pre_transform=on_process_transform)
 print('dataset', dataset)
 train_set, val_set, test_set = torch.utils.data.random_split(dataset, [110831,10000,10000])
-train_loader = DataLoader(train_set, batch_size=2, shuffle=True, prefetch_factor=None)
+train_loader = DataLoader(train_set, batch_size=32, shuffle=True, prefetch_factor=None)
 valid_loader = DataLoader(val_set, batch_size=32, shuffle=False, prefetch_factor=None)
 test_loader = DataLoader(test_set, batch_size=32, shuffle=False, prefetch_factor=None)
 target_index = 8
@@ -100,7 +110,7 @@ target_index = 8
 embedding_dim = 64
 convolution_dim = 300
 dense_dim = 600
-model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool)
+model = Model(embedding_dim,convolution_dim,dense_dim,global_mean_pool).to(device)
 print(model)
 
 learning_rate = 0.005
@@ -142,10 +152,14 @@ for epoch in range(epoch0 + 1,epochs):
     index = 0
     t0 = monotonic()
     for subset in train_loader:
+        subset.to(device)
         batch = on_learn_transform(subset)
         optimizer.zero_grad()
+        print(1)
         loss = criterion(model(batch.x,batch.G,batch.batch)[:,target_index],batch.y[:,target_index])
+        print(2)
         loss.backward()
+        print(3)
         optimizer.step()
         #print(loss)
         inc = loss.tolist()
